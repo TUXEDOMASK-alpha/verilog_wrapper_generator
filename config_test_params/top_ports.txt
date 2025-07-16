@@ -1,0 +1,9 @@
+# Top Ports for Parameter Test
+
+[TOP_PORTS]
+input sys_clk
+input sys_reset
+input [15:0] sys_data_in
+input [11:0] sys_addr
+output [15:0] sys_data_out
+output sys_ready

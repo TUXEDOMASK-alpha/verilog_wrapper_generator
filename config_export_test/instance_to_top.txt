@@ -1,0 +1,6 @@
+# Instance to Top Port Mappings
+# Format: instance_name.port_name -> top_port_name
+
+[INSTANCE_TO_TOP]
+adder1.a -> sys_a
+adder1.b -> sys_b

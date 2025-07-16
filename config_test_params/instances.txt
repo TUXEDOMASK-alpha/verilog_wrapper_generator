@@ -1,0 +1,4 @@
+# Test Instance with Parameters
+
+[INSTANCES]
+param_inst | test_module_with_params.v | DATA_WIDTH=16,ADDR_WIDTH=12,DEPTH=512

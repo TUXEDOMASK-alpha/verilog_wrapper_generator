@@ -1,0 +1,6 @@
+# Instance Connections with intentional errors
+# Format: source_instance.port -> target_instance.port
+
+[INSTANCE_CONNECTIONS]
+# This would be connecting input to input (invalid)
+good_inst.a -> bad_param_inst.a

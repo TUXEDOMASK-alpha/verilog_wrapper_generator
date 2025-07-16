@@ -1,0 +1,15 @@
+# Instance to Top Port Mappings
+# Format: instance_name.port_name -> top_port_name
+
+[INSTANCE_TO_TOP]
+adder_inst.a -> sys_a
+adder_inst.b -> sys_b
+adder_inst.sum -> sys_sum
+mult_inst.a -> sys_mult_a
+mult_inst.b -> sys_mult_b
+mult_inst.product -> sys_product
+counter_inst.clk -> sys_clk
+counter_inst.reset -> sys_reset
+counter_inst.enable -> sys_enable
+counter_inst.count -> sys_count
+counter_inst.overflow -> sys_overflow

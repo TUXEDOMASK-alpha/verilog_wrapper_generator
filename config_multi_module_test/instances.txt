@@ -1,0 +1,7 @@
+# Instance Configuration with separate file and module specification
+# Format: instance_name | file_path | module_name | parameters
+
+[INSTANCES]
+adder_inst | multi_module_test.v | simple_adder | WIDTH=16
+mult_inst | multi_module_test.v | simple_multiplier | WIDTH=8
+counter_inst | multi_module_test.v | counter | WIDTH=4

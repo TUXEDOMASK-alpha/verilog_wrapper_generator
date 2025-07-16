@@ -1,0 +1,4 @@
+# Top Module Name Configuration
+
+[TOP_MODULE_NAME]
+export_test_wrapper

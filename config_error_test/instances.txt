@@ -1,0 +1,15 @@
+# Instance Configuration with intentional errors for testing
+# Format: instance_name | file_path | module_name | parameters
+
+[INSTANCES]
+# This file doesn't exist
+bad_file_inst | nonexistent_file.v | some_module | WIDTH=8
+
+# This module doesn't exist in the file
+bad_module_inst | multi_module_test.v | nonexistent_module | WIDTH=16
+
+# This parameter doesn't exist
+bad_param_inst | multi_module_test.v | simple_adder | NONEXISTENT_PARAM=32
+
+# Valid instance for comparison
+good_inst | multi_module_test.v | simple_adder | WIDTH=8

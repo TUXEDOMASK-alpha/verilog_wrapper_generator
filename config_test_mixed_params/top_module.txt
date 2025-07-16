@@ -1,0 +1,4 @@
+# Top Module Name Configuration
+
+[TOP_MODULE_NAME]
+mixed_param_test_wrapper

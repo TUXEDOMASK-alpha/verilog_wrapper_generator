@@ -1,0 +1,15 @@
+# Top Level Ports Configuration
+# Format: direction | width | port_name
+
+[TOP_PORTS]
+input | [15:0] | sys_a
+input | [15:0] | sys_b
+output | [16:0] | sys_sum
+input | [7:0] | sys_mult_a
+input | [7:0] | sys_mult_b
+output | [15:0] | sys_product
+input |  | sys_clk
+input |  | sys_reset
+input |  | sys_enable
+output | [3:0] | sys_count
+output |  | sys_overflow

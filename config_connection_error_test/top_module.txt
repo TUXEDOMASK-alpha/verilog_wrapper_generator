@@ -1,0 +1,4 @@
+# Top Module Name Configuration
+
+[TOP_MODULE_NAME]
+connection_error_test_wrapper

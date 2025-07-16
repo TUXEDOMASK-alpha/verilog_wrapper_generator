@@ -1,0 +1,12 @@
+# Instance Connections with errors
+# Format: source_instance.port -> target_instance.port
+
+[INSTANCE_CONNECTIONS]
+# Error: connecting input to input (both are inputs)
+adder1.a -> adder2.a
+
+# Error: connecting output to output (both are outputs)  
+adder1.sum -> adder2.sum
+
+# Error: trying to tie an output port to TIE0
+adder1.sum -> TIE0
