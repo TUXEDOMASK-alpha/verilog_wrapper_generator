@@ -1,0 +1,10 @@
+# Test Instance to Top Mapping (minimal connections)
+
+[INSTANCE_TO_TOP]
+# 최소한의 연결만 정의 (나머지는 unconnected로 남겨둠)
+test_inst1.clk -> main_clock
+test_inst1.reset -> main_reset
+test_inst1.valid -> system_output
+
+test_inst2.clk -> main_clock
+test_inst2.reset -> main_reset

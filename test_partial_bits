@@ -1,0 +1,119 @@
+#! /opt/homebrew/Cellar/icarus-verilog/12.0/bin/vvp
+:ivl_version "12.0 (stable)";
+:ivl_delay_selection "TYPICAL";
+:vpi_time_precision + 0;
+:vpi_module "/opt/homebrew/Cellar/icarus-verilog/12.0/lib/ivl/system.vpi";
+:vpi_module "/opt/homebrew/Cellar/icarus-verilog/12.0/lib/ivl/vhdl_sys.vpi";
+:vpi_module "/opt/homebrew/Cellar/icarus-verilog/12.0/lib/ivl/vhdl_textio.vpi";
+:vpi_module "/opt/homebrew/Cellar/icarus-verilog/12.0/lib/ivl/v2005_math.vpi";
+:vpi_module "/opt/homebrew/Cellar/icarus-verilog/12.0/lib/ivl/va_math.vpi";
+S_0x12400d2f0 .scope module, "test_partial_bits" "test_partial_bits" 2 1;
+ .timescale 0 0;
+v0x124021140_0 .net *"_ivl_1", 7 0, L_0x124021f40;  1 drivers
+v0x1240211d0_0 .net *"_ivl_5", 7 0, L_0x124022100;  1 drivers
+v0x124021260_0 .net *"_ivl_9", 1 0, L_0x1240222c0;  1 drivers
+v0x1240212f0_0 .net "output_data_high", 0 0, L_0x124022020;  1 drivers
+v0x124021380_0 .net "output_data_low", 0 0, L_0x1240221c0;  1 drivers
+v0x124021450_0 .net "status_low_bits", 0 0, L_0x1240223a0;  1 drivers
+o0x128028040 .functor BUFZ 1, C4<z>; HiZ drive
+v0x1240214e0_0 .net "sys_clk", 0 0, o0x128028040;  0 drivers
+o0x128028160 .functor BUFZ 1, C4<z>; HiZ drive
+v0x124021570_0 .net "sys_reset", 0 0, o0x128028160;  0 drivers
+o0x128028010 .functor BUFZ 8, C4<zzzzzzzz>; HiZ drive
+v0x124021620_0 .net "w_test_inst1_bidir_port_unconnected", 7 0, o0x128028010;  0 drivers
+o0x128028070 .functor BUFZ 4, C4<zzzz>; HiZ drive
+v0x124021750_0 .net "w_test_inst1_control_unconnected", 3 0, o0x128028070;  0 drivers
+v0x1240217e0_0 .net "w_test_inst1_data_out", 15 0, v0x124020830_0;  1 drivers
+o0x128028100 .functor BUFZ 1, C4<z>; HiZ drive
+v0x124021870_0 .net "w_test_inst1_enable_unconnected", 0 0, o0x128028100;  0 drivers
+v0x124021920_0 .net "w_test_inst1_ready_unconnected", 0 0, v0x1240209c0_0;  1 drivers
+v0x1240219d0_0 .net "w_test_inst1_status", 3 0, v0x124020b00_0;  1 drivers
+o0x1280281c0 .functor BUFZ 1, C4<z>; HiZ drive
+v0x124021a80_0 .net "w_test_inst1_unused_inout1_unconnected", 0 0, o0x1280281c0;  0 drivers
+o0x1280281f0 .functor BUFZ 1, C4<z>; HiZ drive
+v0x124021b30_0 .net "w_test_inst1_unused_input1_unconnected", 0 0, o0x1280281f0;  0 drivers
+o0x128028220 .functor BUFZ 1, C4<z>; HiZ drive
+v0x124021be0_0 .net "w_test_inst1_unused_input2_unconnected", 0 0, o0x128028220;  0 drivers
+o0x128028250 .functor BUFZ 1, C4<z>; HiZ drive
+v0x124021d90_0 .net "w_test_inst1_unused_output1_unconnected", 0 0, o0x128028250;  0 drivers
+o0x128028280 .functor BUFZ 1, C4<z>; HiZ drive
+v0x124021e20_0 .net "w_test_inst1_unused_output2_unconnected", 0 0, o0x128028280;  0 drivers
+v0x124021eb0_0 .net "w_test_inst1_valid_unconnected", 0 0, v0x124020f30_0;  1 drivers
+L_0x124021f40 .part v0x124020830_0, 8, 8;
+L_0x124022020 .part L_0x124021f40, 0, 1;
+L_0x124022100 .part v0x124020830_0, 0, 8;
+L_0x1240221c0 .part L_0x124022100, 0, 1;
+L_0x1240222c0 .part v0x124020b00_0, 0, 2;
+L_0x1240223a0 .part L_0x1240222c0, 0, 1;
+S_0x12400c8c0 .scope module, "test_inst1" "test_module_with_many_ports" 2 36, 3 1 0, S_0x12400d2f0;
+ .timescale 0 0;
+    .port_info 0 /INPUT 1 "clk";
+    .port_info 1 /INPUT 1 "reset";
+    .port_info 2 /INPUT 8 "data_in";
+    .port_info 3 /INPUT 1 "enable";
+    .port_info 4 /INPUT 4 "control";
+    .port_info 5 /OUTPUT 16 "data_out";
+    .port_info 6 /OUTPUT 4 "status";
+    .port_info 7 /OUTPUT 1 "valid";
+    .port_info 8 /OUTPUT 1 "ready";
+    .port_info 9 /INOUT 8 "bidir_port";
+    .port_info 10 /INPUT 1 "unused_input1";
+    .port_info 11 /INPUT 1 "unused_input2";
+    .port_info 12 /OUTPUT 1 "unused_output1";
+    .port_info 13 /OUTPUT 1 "unused_output2";
+    .port_info 14 /INOUT 1 "unused_inout1";
+v0x124012080_0 .net "bidir_port", 7 0, o0x128028010;  alias, 0 drivers
+v0x124020640_0 .net "clk", 0 0, o0x128028040;  alias, 0 drivers
+v0x1240206e0_0 .net "control", 3 0, o0x128028070;  alias, 0 drivers
+L_0x128060010 .functor BUFT 1, C4<0000000z>, C4<0>, C4<0>, C4<0>;
+v0x124020780_0 .net "data_in", 7 0, L_0x128060010;  1 drivers
+v0x124020830_0 .var "data_out", 15 0;
+v0x124020920_0 .net "enable", 0 0, o0x128028100;  alias, 0 drivers
+v0x1240209c0_0 .var "ready", 0 0;
+v0x124020a60_0 .net "reset", 0 0, o0x128028160;  alias, 0 drivers
+v0x124020b00_0 .var "status", 3 0;
+v0x124020c10_0 .net "unused_inout1", 0 0, o0x1280281c0;  alias, 0 drivers
+v0x124020cb0_0 .net "unused_input1", 0 0, o0x1280281f0;  alias, 0 drivers
+v0x124020d50_0 .net "unused_input2", 0 0, o0x128028220;  alias, 0 drivers
+v0x124020df0_0 .net "unused_output1", 0 0, o0x128028250;  alias, 0 drivers
+v0x124020e90_0 .net "unused_output2", 0 0, o0x128028280;  alias, 0 drivers
+v0x124020f30_0 .var "valid", 0 0;
+E_0x12400c200 .event posedge, v0x124020640_0;
+    .scope S_0x12400c8c0;
+T_0 ;
+    %wait E_0x12400c200;
+    %load/vec4 v0x124020a60_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_0.0, 8;
+    %pushi/vec4 0, 0, 16;
+    %assign/vec4 v0x124020830_0, 0;
+    %pushi/vec4 0, 0, 4;
+    %assign/vec4 v0x124020b00_0, 0;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x124020f30_0, 0;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x1240209c0_0, 0;
+    %jmp T_0.1;
+T_0.0 ;
+    %load/vec4 v0x124020920_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_0.2, 8;
+    %load/vec4 v0x124020780_0;
+    %concati/vec4 0, 0, 8;
+    %assign/vec4 v0x124020830_0, 0;
+    %load/vec4 v0x1240206e0_0;
+    %assign/vec4 v0x124020b00_0, 0;
+    %pushi/vec4 1, 0, 1;
+    %assign/vec4 v0x124020f30_0, 0;
+    %pushi/vec4 1, 0, 1;
+    %assign/vec4 v0x1240209c0_0, 0;
+T_0.2 ;
+T_0.1 ;
+    %jmp T_0;
+    .thread T_0;
+# The file index is used to find the file name in the following table.
+:file_names 4;
+    "N/A";
+    "<interactive>";
+    "test_partial_bits.v";
+    "test_module_with_many_ports.v";

@@ -1,0 +1,40 @@
+# Instance to Instance Connections with Partial Bit Support
+# 인스턴스들 간의 연결을 지정합니다.
+# 형식: 인스턴스명.포트명[비트범위] -> 인스턴스명.포트명[비트범위]
+# 특수 연결: TIE0, TIE1, FLOAT
+
+[INSTANCE_CONNECTIONS]
+# CPU와 캐시 연결 (일부 비트만 연결)
+cpu_core.data_out[7:0] -> cache_ctrl.cpu_data_in[7:0]
+cpu_core.data_out[15:8] -> cache_ctrl.cpu_data_in[15:8]
+cpu_core.data_out[31:16] -> cache_ctrl.cpu_data_in[31:16]
+
+cpu_core.addr_out -> cache_ctrl.cpu_addr_in
+cpu_core.read_enable -> cache_ctrl.cpu_read_en
+cpu_core.write_enable -> cache_ctrl.cpu_write_en
+cache_ctrl.cpu_data_out -> cpu_core.data_in
+cache_ctrl.cpu_ready -> cpu_core.cache_ready
+
+# 캐시와 메모리 연결
+cache_ctrl.mem_data_out -> main_memory.data_in
+cache_ctrl.mem_addr_out -> main_memory.addr_in
+cache_ctrl.mem_read_en -> main_memory.read_enable
+cache_ctrl.mem_write_en -> main_memory.write_enable
+main_memory.data_out -> cache_ctrl.mem_data_in
+main_memory.ready -> cache_ctrl.mem_ready
+
+# CPU와 UART 연결 (일부 비트만 연결)
+cpu_core.uart_tx_data -> uart_if.tx_data_in
+cpu_core.uart_tx_valid -> uart_if.tx_valid_in
+uart_if.rx_data_out -> cpu_core.uart_rx_data
+uart_if.rx_valid_out -> cpu_core.uart_rx_valid
+
+# 특수 연결 예시
+# TIE0 - 0으로 연결
+some_unused_port -> TIE0
+
+# TIE1 - 1로 연결  
+some_enable_port -> TIE1
+
+# FLOAT - 고임피던스 상태 (inout 포트용)
+some_bidir_port -> FLOAT

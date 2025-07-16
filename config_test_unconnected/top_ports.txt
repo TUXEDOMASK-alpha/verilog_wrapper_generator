@@ -1,0 +1,7 @@
+# Test Top Ports Configuration (minimal)
+
+[TOP_PORTS]
+# 방향 | 포트폭 | 포트명
+input | | main_clock
+input | | main_reset
+output | | system_output

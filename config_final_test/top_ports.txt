@@ -1,0 +1,11 @@
+# Top Ports for Final Test
+
+[TOP_PORTS]
+input main_clk
+input main_reset
+input [7:0] main_data_in
+output [7:0] main_data_out_high
+output [7:0] main_data_out_low
+output [1:0] main_status_low
+output main_valid
+inout [3:0] main_bidir_lower

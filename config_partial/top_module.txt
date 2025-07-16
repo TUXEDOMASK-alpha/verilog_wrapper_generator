@@ -1,0 +1,5 @@
+# Top Module Configuration with Partial Connections
+# 생성할 탑 모듈의 이름을 지정합니다.
+
+[TOP_MODULE_NAME]
+partial_test_system

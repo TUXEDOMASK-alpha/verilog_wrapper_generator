@@ -1,0 +1,25 @@
+# Test input specification for various Verilog styles
+
+[TOP_MODULE]
+test_system
+
+[INSTANCES]
+ansi_inst | test_ansi.v
+trad_inst | test_traditional.v
+mixed_inst | test_mixed.v
+
+[PORT_MAPPING]
+ansi_inst.clk -> sys_clk
+ansi_inst.reset -> sys_reset
+ansi_inst.data_in -> ansi_data_in
+ansi_inst.data_out -> ansi_data_out
+
+trad_inst.clk -> sys_clk
+trad_inst.reset -> sys_reset
+trad_inst.data_in -> trad_data_in
+trad_inst.data_out -> trad_data_out
+
+mixed_inst.clk -> sys_clk
+mixed_inst.reset -> sys_reset
+mixed_inst.data_in -> mixed_data_in
+mixed_inst.data_out -> mixed_data_out

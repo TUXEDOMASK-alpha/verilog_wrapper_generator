@@ -1,0 +1,9 @@
+# Instance to Instance Connections with Partial Connections
+# 인스턴스들 간의 연결을 지정합니다.
+
+[INSTANCE_CONNECTIONS]
+# 인스턴스 간 부분 연결 예시
+test_inst1.status[3:2] -> test_inst2.data_in[1:0]
+
+# 특수 연결들
+test_inst2.ready -> FLOAT

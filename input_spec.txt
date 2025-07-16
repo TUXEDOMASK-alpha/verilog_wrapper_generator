@@ -1,0 +1,29 @@
+# Verilog Wrapper Generator Input Specification
+# 라인 앞에 #이 있으면 주석입니다.
+# 각 섹션은 [섹션명]으로 시작합니다.
+
+[TOP_MODULE]
+# 생성할 탑 모듈의 이름을 지정하세요
+system_top
+
+[INSTANCES]
+# 인스턴스 정보를 다음 형식으로 입력하세요:
+# 인스턴스명 | 모듈파일경로
+
+cpu_inst | cpu.v
+mem_inst | memory.v
+
+[PORT_MAPPING]
+# 포트 매핑을 다음 형식으로 입력하세요:
+# 인스턴스명.모듈포트 -> 탑포트명
+
+cpu_inst.clk -> sys_clk
+cpu_inst.reset -> sys_reset
+cpu_inst.data_out -> cpu_data
+cpu_inst.addr_out -> cpu_addr
+
+mem_inst.clk -> sys_clk
+mem_inst.reset -> sys_reset
+mem_inst.data_in -> mem_data_in
+mem_inst.addr_in -> mem_addr_in
+mem_inst.data_out -> mem_data_out

@@ -1,0 +1,227 @@
+#! /opt/homebrew/Cellar/icarus-verilog/12.0/bin/vvp
+:ivl_version "12.0 (stable)";
+:ivl_delay_selection "TYPICAL";
+:vpi_time_precision + 0;
+:vpi_module "/opt/homebrew/Cellar/icarus-verilog/12.0/lib/ivl/system.vpi";
+:vpi_module "/opt/homebrew/Cellar/icarus-verilog/12.0/lib/ivl/vhdl_sys.vpi";
+:vpi_module "/opt/homebrew/Cellar/icarus-verilog/12.0/lib/ivl/vhdl_textio.vpi";
+:vpi_module "/opt/homebrew/Cellar/icarus-verilog/12.0/lib/ivl/v2005_math.vpi";
+:vpi_module "/opt/homebrew/Cellar/icarus-verilog/12.0/lib/ivl/va_math.vpi";
+S_0x141705010 .scope module, "final_comprehensive_test" "final_comprehensive_test" 2 1;
+ .timescale 0 0;
+o0x148018d30 .functor BUFZ 1, C4<z>; HiZ drive
+L_0x141719450 .functor BUFZ 1, o0x148018d30, C4<0>, C4<0>, C4<0>;
+v0x141716f70_0 .net *"_ivl_11", 7 0, L_0x141718bf0;  1 drivers
+v0x141717000_0 .net *"_ivl_15", 7 0, L_0x141718dd0;  1 drivers
+v0x141717090_0 .net *"_ivl_19", 1 0, L_0x141718f70;  1 drivers
+v0x141717120_0 .net *"_ivl_23", 3 0, L_0x141719160;  1 drivers
+v0x1417171b0_0 .net *"_ivl_29", 0 0, L_0x141719450;  1 drivers
+v0x141717280_0 .net *"_ivl_33", 1 0, L_0x141719560;  1 drivers
+L_0x148050130 .functor BUFT 1, C4<000>, C4<0>, C4<0>, C4<0>;
+v0x141717330_0 .net *"_ivl_52", 2 0, L_0x148050130;  1 drivers
+v0x1417173e0_0 .net "main_bidir_lower", 0 0, L_0x141719280;  1 drivers
+o0x148018040 .functor BUFZ 1, C4<z>; HiZ drive
+v0x141717480_0 .net "main_clk", 0 0, o0x148018040;  0 drivers
+v0x141717590_0 .net "main_data_out_high", 0 0, L_0x141718cf0;  1 drivers
+v0x141717620_0 .net "main_data_out_low", 0 0, L_0x141718e90;  1 drivers
+o0x148018160 .functor BUFZ 1, C4<z>; HiZ drive
+v0x1417176b0_0 .net "main_reset", 0 0, o0x148018160;  0 drivers
+v0x141717780_0 .net "main_status_low", 0 0, L_0x141719080;  1 drivers
+v0x141717810_0 .net "main_valid", 0 0, v0x141715e90_0;  1 drivers
+o0x148018010 .functor BUFZ 8, C4<zzzzzzzz>; HiZ drive
+v0x1417178a0_0 .net "w_test_inst1_bidir_port", 7 0, o0x148018010;  0 drivers
+L_0x148050058 .functor BUFT 1, C4<0>, C4<0>, C4<0>, C4<0>;
+v0x141717950_0 .net "w_test_inst1_control_tied_to_0", 0 0, L_0x148050058;  1 drivers
+v0x1417179e0_0 .net "w_test_inst1_data_out", 15 0, v0x141715790_0;  1 drivers
+L_0x148050010 .functor BUFT 1, C4<1>, C4<0>, C4<0>, C4<0>;
+v0x141717b90_0 .net "w_test_inst1_enable_tied_to_1", 0 0, L_0x148050010;  1 drivers
+v0x141717c20_0 .net "w_test_inst1_ready", 0 0, o0x148018d30;  0 drivers
+v0x141717cb0_0 .net "w_test_inst1_ready_to_test_inst2_control_to_0", 0 0, v0x141715920_0;  1 drivers
+v0x141717d40_0 .net "w_test_inst1_status", 3 0, v0x141715a60_0;  1 drivers
+o0x1480181c0 .functor BUFZ 1, C4<z>; HiZ drive
+v0x141717dd0_0 .net "w_test_inst1_unused_inout1_unconnected", 0 0, o0x1480181c0;  0 drivers
+o0x1480181f0 .functor BUFZ 1, C4<z>; HiZ drive
+v0x141717e60_0 .net "w_test_inst1_unused_input1_unconnected", 0 0, o0x1480181f0;  0 drivers
+o0x148018220 .functor BUFZ 1, C4<z>; HiZ drive
+v0x141717f10_0 .net "w_test_inst1_unused_input2_unconnected", 0 0, o0x148018220;  0 drivers
+o0x148018250 .functor BUFZ 1, C4<z>; HiZ drive
+v0x141717fc0_0 .net "w_test_inst1_unused_output1_unconnected", 0 0, o0x148018250;  0 drivers
+o0x148018280 .functor BUFZ 1, C4<z>; HiZ drive
+v0x141718070_0 .net "w_test_inst1_unused_output2_unconnected", 0 0, o0x148018280;  0 drivers
+o0x148018d60 .functor BUFZ 1, C4<z>; HiZ drive
+I0x14281f4b0 .island tran;
+p0x148018d60 .port I0x14281f4b0, o0x148018d60;
+v0x141718120_0 .net8 "w_test_inst2_bidir_port_float", 0 0, p0x148018d60;  0 drivers, strength-aware
+v0x1417181b0_0 .net "w_test_inst2_control", 3 0, L_0x141719360;  1 drivers
+v0x141718240_0 .net "w_test_inst2_data_in", 7 0, L_0x1417194c0;  1 drivers
+L_0x1480500e8 .functor BUFT 1, C4<1>, C4<0>, C4<0>, C4<0>;
+v0x1417182d0_0 .net "w_test_inst2_data_in_tied_to_1", 0 0, L_0x1480500e8;  1 drivers
+v0x141718360_0 .net "w_test_inst2_data_out_unconnected", 15 0, v0x141716660_0;  1 drivers
+L_0x1480500a0 .functor BUFT 1, C4<0>, C4<0>, C4<0>, C4<0>;
+v0x141718410_0 .net "w_test_inst2_enable_tied_to_0", 0 0, L_0x1480500a0;  1 drivers
+v0x1417184c0_0 .net "w_test_inst2_ready_unconnected", 0 0, v0x1417167f0_0;  1 drivers
+v0x141717a90_0 .net "w_test_inst2_status_unconnected", 3 0, v0x141716920_0;  1 drivers
+o0x148018700 .functor BUFZ 1, C4<z>; HiZ drive
+v0x141718750_0 .net "w_test_inst2_unused_inout1_unconnected", 0 0, o0x148018700;  0 drivers
+o0x148018730 .functor BUFZ 1, C4<z>; HiZ drive
+v0x1417187e0_0 .net "w_test_inst2_unused_input1_unconnected", 0 0, o0x148018730;  0 drivers
+o0x148018760 .functor BUFZ 1, C4<z>; HiZ drive
+v0x141718890_0 .net "w_test_inst2_unused_input2_unconnected", 0 0, o0x148018760;  0 drivers
+o0x148018790 .functor BUFZ 1, C4<z>; HiZ drive
+v0x141718940_0 .net "w_test_inst2_unused_output1_unconnected", 0 0, o0x148018790;  0 drivers
+o0x1480187c0 .functor BUFZ 1, C4<z>; HiZ drive
+v0x1417189f0_0 .net "w_test_inst2_unused_output2_unconnected", 0 0, o0x1480187c0;  0 drivers
+v0x141718aa0_0 .net "w_test_inst2_valid_unconnected", 0 0, v0x141716d60_0;  1 drivers
+L_0x141718bf0 .part v0x141715790_0, 8, 8;
+L_0x141718cf0 .part L_0x141718bf0, 0, 1;
+L_0x141718dd0 .part v0x141715790_0, 0, 8;
+L_0x141718e90 .part L_0x141718dd0, 0, 1;
+L_0x141718f70 .part v0x141715a60_0, 0, 2;
+L_0x141719080 .part L_0x141718f70, 0, 1;
+L_0x141719160 .part o0x148018010, 0, 4;
+L_0x141719280 .part L_0x141719160, 0, 1;
+L_0x141719360 .part/pv L_0x141719450, 0, 1, 4;
+L_0x1417194c0 .part/pv L_0x141719560, 0, 2, 8;
+L_0x141719560 .part v0x141715a60_0, 2, 2;
+L_0x1417196a0 .concat [ 1 3 0 0], v0x141715920_0, L_0x148050130;
+o0x1480185b0 .functor BUFZ 8, C4<zzzzzzzz>; HiZ drive
+p0x1480185b0 .port I0x14281f4b0, o0x1480185b0;
+ .tranvp 8 1 0, I0x14281f4b0, p0x1480185b0 p0x148018d60;
+S_0x141705180 .scope module, "test_inst1" "test_module_with_many_ports" 2 67, 3 1 0, S_0x141705010;
+ .timescale 0 0;
+    .port_info 0 /INPUT 1 "clk";
+    .port_info 1 /INPUT 1 "reset";
+    .port_info 2 /INPUT 8 "data_in";
+    .port_info 3 /INPUT 1 "enable";
+    .port_info 4 /INPUT 4 "control";
+    .port_info 5 /OUTPUT 16 "data_out";
+    .port_info 6 /OUTPUT 4 "status";
+    .port_info 7 /OUTPUT 1 "valid";
+    .port_info 8 /OUTPUT 1 "ready";
+    .port_info 9 /INOUT 8 "bidir_port";
+    .port_info 10 /INPUT 1 "unused_input1";
+    .port_info 11 /INPUT 1 "unused_input2";
+    .port_info 12 /OUTPUT 1 "unused_output1";
+    .port_info 13 /OUTPUT 1 "unused_output2";
+    .port_info 14 /INOUT 1 "unused_inout1";
+v0x1417054e0_0 .net "bidir_port", 7 0, o0x148018010;  alias, 0 drivers
+v0x1417155a0_0 .net "clk", 0 0, o0x148018040;  alias, 0 drivers
+L_0x1480501c0 .functor BUFT 1, C4<0000>, C4<0>, C4<0>, C4<0>;
+v0x141715640_0 .net "control", 3 0, L_0x1480501c0;  1 drivers
+L_0x148050178 .functor BUFT 1, C4<0000000z>, C4<0>, C4<0>, C4<0>;
+v0x1417156e0_0 .net "data_in", 7 0, L_0x148050178;  1 drivers
+v0x141715790_0 .var "data_out", 15 0;
+v0x141715880_0 .net "enable", 0 0, L_0x148050010;  alias, 1 drivers
+v0x141715920_0 .var "ready", 0 0;
+v0x1417159c0_0 .net "reset", 0 0, o0x148018160;  alias, 0 drivers
+v0x141715a60_0 .var "status", 3 0;
+v0x141715b70_0 .net "unused_inout1", 0 0, o0x1480181c0;  alias, 0 drivers
+v0x141715c10_0 .net "unused_input1", 0 0, o0x1480181f0;  alias, 0 drivers
+v0x141715cb0_0 .net "unused_input2", 0 0, o0x148018220;  alias, 0 drivers
+v0x141715d50_0 .net "unused_output1", 0 0, o0x148018250;  alias, 0 drivers
+v0x141715df0_0 .net "unused_output2", 0 0, o0x148018280;  alias, 0 drivers
+v0x141715e90_0 .var "valid", 0 0;
+E_0x141704f00 .event posedge, v0x1417155a0_0;
+S_0x1417160a0 .scope module, "test_inst2" "test_module_with_many_ports" 2 85, 3 1 0, S_0x141705010;
+ .timescale 0 0;
+    .port_info 0 /INPUT 1 "clk";
+    .port_info 1 /INPUT 1 "reset";
+    .port_info 2 /INPUT 8 "data_in";
+    .port_info 3 /INPUT 1 "enable";
+    .port_info 4 /INPUT 4 "control";
+    .port_info 5 /OUTPUT 16 "data_out";
+    .port_info 6 /OUTPUT 4 "status";
+    .port_info 7 /OUTPUT 1 "valid";
+    .port_info 8 /OUTPUT 1 "ready";
+    .port_info 9 /INOUT 8 "bidir_port";
+    .port_info 10 /INPUT 1 "unused_input1";
+    .port_info 11 /INPUT 1 "unused_input2";
+    .port_info 12 /OUTPUT 1 "unused_output1";
+    .port_info 13 /OUTPUT 1 "unused_output2";
+    .port_info 14 /INOUT 1 "unused_inout1";
+v0x1417163d0_0 .net8 "bidir_port", 7 0, p0x1480185b0;  0 drivers, strength-aware
+v0x141716460_0 .net "clk", 0 0, o0x148018040;  alias, 0 drivers
+v0x141716510_0 .net "control", 3 0, L_0x1417196a0;  1 drivers
+L_0x148050208 .functor BUFT 1, C4<00000001>, C4<0>, C4<0>, C4<0>;
+v0x1417165c0_0 .net "data_in", 7 0, L_0x148050208;  1 drivers
+v0x141716660_0 .var "data_out", 15 0;
+v0x141716750_0 .net "enable", 0 0, L_0x1480500a0;  alias, 1 drivers
+v0x1417167f0_0 .var "ready", 0 0;
+v0x141716890_0 .net "reset", 0 0, o0x148018160;  alias, 0 drivers
+v0x141716920_0 .var "status", 3 0;
+v0x141716a40_0 .net "unused_inout1", 0 0, o0x148018700;  alias, 0 drivers
+v0x141716ae0_0 .net "unused_input1", 0 0, o0x148018730;  alias, 0 drivers
+v0x141716b80_0 .net "unused_input2", 0 0, o0x148018760;  alias, 0 drivers
+v0x141716c20_0 .net "unused_output1", 0 0, o0x148018790;  alias, 0 drivers
+v0x141716cc0_0 .net "unused_output2", 0 0, o0x1480187c0;  alias, 0 drivers
+v0x141716d60_0 .var "valid", 0 0;
+    .scope S_0x141705180;
+T_0 ;
+    %wait E_0x141704f00;
+    %load/vec4 v0x1417159c0_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_0.0, 8;
+    %pushi/vec4 0, 0, 16;
+    %assign/vec4 v0x141715790_0, 0;
+    %pushi/vec4 0, 0, 4;
+    %assign/vec4 v0x141715a60_0, 0;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x141715e90_0, 0;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x141715920_0, 0;
+    %jmp T_0.1;
+T_0.0 ;
+    %load/vec4 v0x141715880_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_0.2, 8;
+    %load/vec4 v0x1417156e0_0;
+    %concati/vec4 0, 0, 8;
+    %assign/vec4 v0x141715790_0, 0;
+    %load/vec4 v0x141715640_0;
+    %assign/vec4 v0x141715a60_0, 0;
+    %pushi/vec4 1, 0, 1;
+    %assign/vec4 v0x141715e90_0, 0;
+    %pushi/vec4 1, 0, 1;
+    %assign/vec4 v0x141715920_0, 0;
+T_0.2 ;
+T_0.1 ;
+    %jmp T_0;
+    .thread T_0;
+    .scope S_0x1417160a0;
+T_1 ;
+    %wait E_0x141704f00;
+    %load/vec4 v0x141716890_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_1.0, 8;
+    %pushi/vec4 0, 0, 16;
+    %assign/vec4 v0x141716660_0, 0;
+    %pushi/vec4 0, 0, 4;
+    %assign/vec4 v0x141716920_0, 0;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x141716d60_0, 0;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x1417167f0_0, 0;
+    %jmp T_1.1;
+T_1.0 ;
+    %load/vec4 v0x141716750_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_1.2, 8;
+    %load/vec4 v0x1417165c0_0;
+    %concati/vec4 0, 0, 8;
+    %assign/vec4 v0x141716660_0, 0;
+    %load/vec4 v0x141716510_0;
+    %assign/vec4 v0x141716920_0, 0;
+    %pushi/vec4 1, 0, 1;
+    %assign/vec4 v0x141716d60_0, 0;
+    %pushi/vec4 1, 0, 1;
+    %assign/vec4 v0x1417167f0_0, 0;
+T_1.2 ;
+T_1.1 ;
+    %jmp T_1;
+    .thread T_1;
+# The file index is used to find the file name in the following table.
+:file_names 4;
+    "N/A";
+    "<interactive>";
+    "final_comprehensive_test.v";
+    "test_module_with_many_ports.v";

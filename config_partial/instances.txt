@@ -1,0 +1,7 @@
+# Instance Configuration with Partial Connections
+# 인스턴스화할 모듈과 그 모듈의 이름 및 파라미터를 지정합니다.
+
+[INSTANCES]
+# 인스턴스명 | 모듈파일 | 파라미터
+test_inst1 | test_partial_module.v | 
+test_inst2 | test_partial_module.v |

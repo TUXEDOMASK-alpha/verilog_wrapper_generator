@@ -1,0 +1,9 @@
+# Top Ports for Partial Test
+
+[TOP_PORTS]
+input sys_clk
+input sys_reset
+input [7:0] input_data
+output [7:0] output_data_high
+output [7:0] output_data_low
+output [1:0] status_low_bits

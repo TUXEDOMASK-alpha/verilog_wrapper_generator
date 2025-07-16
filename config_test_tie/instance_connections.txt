@@ -1,0 +1,12 @@
+# Test Instance Connections
+
+[INSTANCE_CONNECTIONS]
+# 인스턴스간 연결
+test_inst1.ready -> test_inst2.data_in[0]
+test_inst1.status -> test_inst2.control
+
+# 일부 포트는 TIE로 연결
+test_inst2.unused_input1 -> TIE0
+test_inst2.unused_input2 -> TIE1
+
+# 일부 포트는 의도적으로 연결하지 않음 (unconnected 리포트에 나타날 것)

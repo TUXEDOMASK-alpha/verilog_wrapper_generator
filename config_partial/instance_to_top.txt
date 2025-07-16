@@ -1,0 +1,27 @@
+# Instance to Top Port Mapping with Partial Connections
+# 인스턴스의 포트를 탑 모듈의 포트로 연결합니다.
+
+[INSTANCE_TO_TOP]
+# 클록과 리셋 연결
+test_inst1.clk -> sys_clk
+test_inst1.reset -> sys_reset
+test_inst2.clk -> sys_clk
+test_inst2.reset -> sys_reset
+
+# 입력 데이터 연결
+test_inst1.data_in -> input_data
+
+# 출력 데이터 부분 연결
+test_inst1.data_out[15:8] -> output_data_high
+test_inst1.data_out[7:0] -> output_data_low
+
+# 상태 부분 연결 (4비트 중 2비트만)
+test_inst1.status[1:0] -> status_low
+
+# 준비 신호 연결
+test_inst1.ready -> system_ready
+
+# 일부 포트는 특수 연결
+test_inst1.enable -> TIE1
+test_inst2.enable -> TIE0
+test_inst2.data_in -> TIE0

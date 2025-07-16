@@ -1,0 +1,28 @@
+# Instance to Top Port Mapping with Custom Port Names
+# 인스턴스의 포트를 탑 모듈의 포트로 연결합니다.
+# 형식: 인스턴스명.포트명 -> 탑포트명
+
+[INSTANCE_TO_TOP]
+# 클록과 리셋 연결
+cpu_core.clk -> system_clock
+cpu_core.reset -> system_reset
+main_memory.clk -> system_clock
+main_memory.reset -> system_reset
+cache_ctrl.clk -> system_clock
+cache_ctrl.reset -> system_reset
+uart_if.clk -> system_clock
+uart_if.reset -> system_reset
+
+# UART 인터페이스 연결 (커스텀 포트명)
+uart_if.rx_data -> uart_receive_data
+uart_if.tx_data -> uart_transmit_data
+uart_if.tx_valid -> uart_transmit_valid
+uart_if.rx_valid -> uart_receive_valid
+
+# 디버그 포트 연결 (커스텀 포트명)
+cpu_core.debug_data -> cpu_debug_information
+cpu_core.debug_addr -> cpu_debug_address
+cpu_core.debug_valid -> cpu_debug_enable
+
+# 외부 버스 연결 (커스텀 포트명)
+main_memory.external_bus -> memory_external_interface

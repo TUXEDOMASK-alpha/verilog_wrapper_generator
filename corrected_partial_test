@@ -1,0 +1,137 @@
+#! /opt/homebrew/Cellar/icarus-verilog/12.0/bin/vvp
+:ivl_version "12.0 (stable)";
+:ivl_delay_selection "TYPICAL";
+:vpi_time_precision + 0;
+:vpi_module "/opt/homebrew/Cellar/icarus-verilog/12.0/lib/ivl/system.vpi";
+:vpi_module "/opt/homebrew/Cellar/icarus-verilog/12.0/lib/ivl/vhdl_sys.vpi";
+:vpi_module "/opt/homebrew/Cellar/icarus-verilog/12.0/lib/ivl/vhdl_textio.vpi";
+:vpi_module "/opt/homebrew/Cellar/icarus-verilog/12.0/lib/ivl/v2005_math.vpi";
+:vpi_module "/opt/homebrew/Cellar/icarus-verilog/12.0/lib/ivl/va_math.vpi";
+S_0x13d704230 .scope module, "partial_test_system" "partial_test_system" 2 1;
+ .timescale 0 0;
+    .port_info 0 /INPUT 1 "sys_clk";
+    .port_info 1 /INPUT 1 "sys_reset";
+    .port_info 2 /INPUT 8 "input_data";
+    .port_info 3 /OUTPUT 8 "output_data_high";
+    .port_info 4 /OUTPUT 8 "output_data_low";
+    .port_info 5 /OUTPUT 2 "status_low";
+    .port_info 6 /OUTPUT 1 "system_ready";
+v0x13d606f40_0 .net *"_ivl_17", 1 0, L_0x13d607ee0;  1 drivers
+o0x120008040 .functor BUFZ 8, C4<zzzzzzzz>; HiZ drive
+v0x13d607000_0 .net "input_data", 7 0, o0x120008040;  0 drivers
+v0x13d6070a0_0 .net "output_data_high", 7 0, L_0x13d607bc0;  1 drivers
+v0x13d607130_0 .net "output_data_low", 7 0, L_0x13d607ca0;  1 drivers
+v0x13d6071e0_0 .net "status_low", 1 0, L_0x13d607d40;  1 drivers
+o0x120008010 .functor BUFZ 1, C4<z>; HiZ drive
+v0x13d6072d0_0 .net "sys_clk", 0 0, o0x120008010;  0 drivers
+o0x120008100 .functor BUFZ 1, C4<z>; HiZ drive
+v0x13d6073a0_0 .net "sys_reset", 0 0, o0x120008100;  0 drivers
+v0x13d607470_0 .net "system_ready", 0 0, L_0x13d607ff0;  1 drivers
+v0x13d607500_0 .net "w_test_inst1_data_out", 15 0, v0x13d6062e0_0;  1 drivers
+L_0x128008010 .functor BUFT 1, C4<1>, C4<0>, C4<0>, C4<0>;
+v0x13d607610_0 .net "w_test_inst1_enable", 0 0, L_0x128008010;  1 drivers
+v0x13d6076a0_0 .net "w_test_inst1_status", 3 0, v0x13d6065c0_0;  1 drivers
+L_0x1280080a0 .functor BUFT 1, C4<00000000>, C4<0>, C4<0>, C4<0>;
+RS_0x1200082b0 .resolv tri, L_0x1280080a0, L_0x13d607e20;
+v0x13d607730_0 .net8 "w_test_inst2_data_in", 7 0, RS_0x1200082b0;  2 drivers
+v0x13d6077c0_0 .net "w_test_inst2_data_out_unconnected", 15 0, v0x13d606b20_0;  1 drivers
+L_0x128008058 .functor BUFT 1, C4<0>, C4<0>, C4<0>, C4<0>;
+v0x13d607870_0 .net "w_test_inst2_enable", 0 0, L_0x128008058;  1 drivers
+v0x13d607920_0 .net "w_test_inst2_ready", 0 0, L_0x13d608150;  1 drivers
+v0x13d6079d0_0 .net "w_test_inst2_status_unconnected", 3 0, v0x13d606df0_0;  1 drivers
+L_0x13d607bc0 .part v0x13d6062e0_0, 8, 8;
+L_0x13d607ca0 .part v0x13d6062e0_0, 0, 8;
+L_0x13d607d40 .part v0x13d6065c0_0, 0, 2;
+L_0x13d607e20 .part/pv L_0x13d607ee0, 0, 2, 8;
+L_0x13d607ee0 .part v0x13d6065c0_0, 2, 2;
+S_0x13d704460 .scope module, "test_inst1" "test_partial_module" 2 42, 3 1 0, S_0x13d704230;
+ .timescale 0 0;
+    .port_info 0 /INPUT 1 "clk";
+    .port_info 1 /INPUT 1 "reset";
+    .port_info 2 /INPUT 8 "data_in";
+    .port_info 3 /OUTPUT 16 "data_out";
+    .port_info 4 /OUTPUT 4 "status";
+    .port_info 5 /INPUT 1 "enable";
+    .port_info 6 /OUTPUT 1 "ready";
+v0x13d704780_0 .net "clk", 0 0, o0x120008010;  alias, 0 drivers
+v0x13d606220_0 .net "data_in", 7 0, o0x120008040;  alias, 0 drivers
+v0x13d6062e0_0 .var "data_out", 15 0;
+v0x13d6063a0_0 .net "enable", 0 0, L_0x128008010;  alias, 1 drivers
+v0x13d606440_0 .net "ready", 0 0, L_0x13d607ff0;  alias, 1 drivers
+v0x13d606520_0 .net "reset", 0 0, o0x120008100;  alias, 0 drivers
+v0x13d6065c0_0 .var "status", 3 0;
+E_0x13d704720 .event posedge, v0x13d704780_0;
+L_0x13d607ff0 .reduce/or v0x13d6062e0_0;
+S_0x13d606720 .scope module, "test_inst2" "test_partial_module" 2 52, 3 1 0, S_0x13d704230;
+ .timescale 0 0;
+    .port_info 0 /INPUT 1 "clk";
+    .port_info 1 /INPUT 1 "reset";
+    .port_info 2 /INPUT 8 "data_in";
+    .port_info 3 /OUTPUT 16 "data_out";
+    .port_info 4 /OUTPUT 4 "status";
+    .port_info 5 /INPUT 1 "enable";
+    .port_info 6 /OUTPUT 1 "ready";
+v0x13d6069e0_0 .net "clk", 0 0, o0x120008010;  alias, 0 drivers
+v0x13d606a80_0 .net8 "data_in", 7 0, RS_0x1200082b0;  alias, 2 drivers
+v0x13d606b20_0 .var "data_out", 15 0;
+v0x13d606be0_0 .net "enable", 0 0, L_0x128008058;  alias, 1 drivers
+v0x13d606c80_0 .net "ready", 0 0, L_0x13d608150;  alias, 1 drivers
+v0x13d606d60_0 .net "reset", 0 0, o0x120008100;  alias, 0 drivers
+v0x13d606df0_0 .var "status", 3 0;
+L_0x13d608150 .reduce/or v0x13d606b20_0;
+    .scope S_0x13d704460;
+T_0 ;
+    %wait E_0x13d704720;
+    %load/vec4 v0x13d606520_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_0.0, 8;
+    %pushi/vec4 0, 0, 16;
+    %assign/vec4 v0x13d6062e0_0, 0;
+    %pushi/vec4 0, 0, 4;
+    %assign/vec4 v0x13d6065c0_0, 0;
+    %jmp T_0.1;
+T_0.0 ;
+    %load/vec4 v0x13d6063a0_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_0.2, 8;
+    %load/vec4 v0x13d606220_0;
+    %concati/vec4 0, 0, 8;
+    %assign/vec4 v0x13d6062e0_0, 0;
+    %load/vec4 v0x13d606220_0;
+    %parti/s 4, 0, 2;
+    %assign/vec4 v0x13d6065c0_0, 0;
+T_0.2 ;
+T_0.1 ;
+    %jmp T_0;
+    .thread T_0;
+    .scope S_0x13d606720;
+T_1 ;
+    %wait E_0x13d704720;
+    %load/vec4 v0x13d606d60_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_1.0, 8;
+    %pushi/vec4 0, 0, 16;
+    %assign/vec4 v0x13d606b20_0, 0;
+    %pushi/vec4 0, 0, 4;
+    %assign/vec4 v0x13d606df0_0, 0;
+    %jmp T_1.1;
+T_1.0 ;
+    %load/vec4 v0x13d606be0_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_1.2, 8;
+    %load/vec4 v0x13d606a80_0;
+    %concati/vec4 0, 0, 8;
+    %assign/vec4 v0x13d606b20_0, 0;
+    %load/vec4 v0x13d606a80_0;
+    %parti/s 4, 0, 2;
+    %assign/vec4 v0x13d606df0_0, 0;
+T_1.2 ;
+T_1.1 ;
+    %jmp T_1;
+    .thread T_1;
+# The file index is used to find the file name in the following table.
+:file_names 4;
+    "N/A";
+    "<interactive>";
+    "corrected_partial_test.v";
+    "test_partial_module.v";
