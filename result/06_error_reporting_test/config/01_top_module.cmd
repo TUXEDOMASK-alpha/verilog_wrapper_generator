@@ -1,0 +1,2 @@
+[TOP_MODULE_NAME]
+error_reporting_test

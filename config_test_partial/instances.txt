@@ -1,4 +1,0 @@
-# Test Instances with Partial Connections
-
-[INSTANCES]
-test_inst1 | test_module_with_many_ports.v

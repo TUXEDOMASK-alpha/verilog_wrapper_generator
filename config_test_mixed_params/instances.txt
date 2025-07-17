@@ -1,5 +1,0 @@
-# Instance Configuration
-# Format: instance_name | file_path | parameters
-
-[INSTANCES]
-mixed_param_inst | test_module_with_mixed_params.v | DATA_WIDTH=16, ADDR_WIDTH=12, DEPTH=512

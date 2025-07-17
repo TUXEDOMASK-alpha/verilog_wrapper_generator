@@ -354,33 +354,49 @@ class ConfigParser:
         
         import os
         
-        # Parse top module name
-        top_module_file = os.path.join(config_dir, 'top_module.txt')
+        # Parse top module configuration - try both .cmd and .txt extensions
+        top_module_file = os.path.join(config_dir, '01_top_module.cmd')
+        if not os.path.exists(top_module_file):
+            top_module_file = os.path.join(config_dir, 'top_module.txt')
         if os.path.exists(top_module_file):
-            config['top_module'] = self._parse_top_module(top_module_file)
+            top_module_config = self._parse_top_module(top_module_file)
+            config['top_module'] = top_module_config['name']
+            config['top_module_parameters'] = top_module_config['parameters']
+        else:
+            config['top_module_parameters'] = {}
         
         # Parse instances
-        instances_file = os.path.join(config_dir, 'instances.txt')
+        instances_file = os.path.join(config_dir, '02_instances.cmd')
+        if not os.path.exists(instances_file):
+            instances_file = os.path.join(config_dir, 'instances.txt')
         if os.path.exists(instances_file):
             config['instances'] = self._parse_instances(instances_file)
         
         # Parse top ports
-        top_ports_file = os.path.join(config_dir, 'top_ports.txt')
+        top_ports_file = os.path.join(config_dir, '03_top_ports.cmd')
+        if not os.path.exists(top_ports_file):
+            top_ports_file = os.path.join(config_dir, 'top_ports.txt')
         if os.path.exists(top_ports_file):
             config['top_ports'] = self._parse_top_ports(top_ports_file)
         
         # Parse instance to top mappings
-        instance_to_top_file = os.path.join(config_dir, 'instance_to_top.txt')
+        instance_to_top_file = os.path.join(config_dir, '04_instance_to_top.cmd')
+        if not os.path.exists(instance_to_top_file):
+            instance_to_top_file = os.path.join(config_dir, 'instance_to_top.txt')
         if os.path.exists(instance_to_top_file):
             config['instance_to_top'] = self._parse_instance_to_top(instance_to_top_file)
         
         # Parse instance connections
-        instance_connections_file = os.path.join(config_dir, 'instance_connections.txt')
+        instance_connections_file = os.path.join(config_dir, '05_instance_connections.cmd')
+        if not os.path.exists(instance_connections_file):
+            instance_connections_file = os.path.join(config_dir, 'instance_connections.txt')
         if os.path.exists(instance_connections_file):
             config['instance_connections'] = self._parse_instance_connections(instance_connections_file)
         
         # Parse instance port exports
-        instance_export_port_file = os.path.join(config_dir, 'instance_export_port.txt')
+        instance_export_port_file = os.path.join(config_dir, '06_instance_export_port.cmd')
+        if not os.path.exists(instance_export_port_file):
+            instance_export_port_file = os.path.join(config_dir, 'instance_export_port.txt')
         if os.path.exists(instance_export_port_file):
             config['instance_export_ports'] = self._parse_instance_export_ports(instance_export_port_file)
         else:
@@ -388,20 +404,40 @@ class ConfigParser:
         
         return config
     
-    def _parse_top_module(self, file_path: str) -> str:
-        """Parse top module name from file"""
+    def _parse_top_module(self, file_path: str) -> Dict:
+        """Parse top module configuration from file
+        
+        Returns dict with 'name' and 'parameters' keys
+        """
         with open(file_path, 'r', encoding='utf-8') as f:
             lines = f.readlines()
+        
+        config = {
+            'name': 'top_wrapper',
+            'parameters': {}
+        }
+        
+        current_section = None
         
         for line in lines:
             line = line.strip()
             if not line or line.startswith('#'):
                 continue
-            if line.startswith('[TOP_MODULE_NAME]'):
+            
+            # Check for section headers
+            if line.startswith('[') and line.endswith(']'):
+                current_section = line[1:-1]
                 continue
-            return line
+            
+            if current_section == 'TOP_MODULE_NAME':
+                config['name'] = line
+            elif current_section == 'TOP_MODULE_PARAMETERS':
+                # Parse parameter line: PARAM_NAME = PARAM_VALUE
+                if '=' in line:
+                    param_name, param_value = line.split('=', 1)
+                    config['parameters'][param_name.strip()] = param_value.strip()
         
-        return 'top_wrapper'
+        return config
     
     def _parse_instances(self, file_path: str) -> List[Dict]:
         """Parse instances from file"""
@@ -681,6 +717,7 @@ class WrapperGenerator:
     def generate_wrapper_advanced(self, config: Dict) -> str:
         """Generate wrapper Verilog code from advanced configuration"""
         top_module_name = config.get('top_module', 'top_wrapper')
+        top_module_parameters = config.get('top_module_parameters', {})
         instances_config = config.get('instances', [])
         top_ports = config.get('top_ports', [])
         instance_to_top_config = config.get('instance_to_top', {})
@@ -707,12 +744,29 @@ class WrapperGenerator:
             instance = Instance(module=module, instance_name=instance_name, parameters=parameters, port_mapping=port_mapping)
             instances.append(instance)
         
-        # Add exported ports to top_ports
+        # Add exported ports to top_ports, avoiding duplicates
         exported_top_ports = self._generate_exported_ports(instances, instance_export_ports)
-        all_top_ports = top_ports + exported_top_ports
+        
+        # Create a set of existing port names to avoid duplicates
+        existing_port_names = {port.name for port in top_ports}
+        
+        # Only add exported ports that don't already exist in manually defined ports
+        filtered_exported_ports = [port for port in exported_top_ports if port.name not in existing_port_names]
+        
+        all_top_ports = top_ports + filtered_exported_ports
+        
+        # Report any skipped duplicate ports
+        skipped_ports = [port.name for port in exported_top_ports if port.name in existing_port_names]
+        if skipped_ports:
+            for port_name in skipped_ports:
+                self.error_reporter.add_warning(
+                    "DUPLICATE_PORT_IGNORED", 
+                    f"Exported port '{port_name}' ignored because it already exists in manual port definitions",
+                    ""
+                )
         
         # Generate wrapper code
-        wrapper_code = self._generate_wrapper_code_advanced(top_module_name, instances, all_top_ports, instance_connections, instance_to_top_config, instance_export_ports)
+        wrapper_code = self._generate_wrapper_code_advanced(top_module_name, top_module_parameters, instances, all_top_ports, instance_connections, instance_to_top_config, instance_export_ports)
         return wrapper_code
     
     def generate_wrapper(self, config: Dict) -> str:
@@ -824,16 +878,20 @@ class WrapperGenerator:
             param_str = ", ".join([f"{k}={v}" for k, v in parameters.items()])
             config_line += f" | {param_str}"
         
-        # Check if file exists
-        if not os.path.exists(file_path):
+        # Check if file exists - try multiple locations
+        resolved_file_path = self._resolve_file_path(file_path)
+        if not resolved_file_path:
             self.error_reporter.add_error("FILE_NOT_FOUND", 
                                         f"Verilog file '{file_path}' does not exist", 
                                         config_line)
             return False
         
+        # Update the file path to the resolved path
+        inst_config['file'] = resolved_file_path
+        
         # Try to parse the module
         try:
-            module = self.parser.parse_module(file_path, module_name)
+            module = self.parser.parse_module(resolved_file_path, module_name)
             inst_config['_parsed_module'] = module  # Cache parsed module
             
             # Validate parameters
@@ -1005,6 +1063,31 @@ class WrapperGenerator:
         
         return f"w_{source_clean}_to_{target_clean}{range_suffix}"
     
+    def _get_port_width_value(self, width_str: str) -> str:
+        """Extract the bit width value from port width string like '[7:0]' -> '8' """
+        if not width_str:
+            return "1"
+        
+        # Remove brackets
+        width_clean = width_str.strip('[]')
+        
+        # Handle range format like "7:0"
+        if ':' in width_clean:
+            parts = width_clean.split(':')
+            try:
+                msb = int(parts[0])
+                lsb = int(parts[1])
+                return str(msb - lsb + 1)
+            except:
+                return "1"
+        else:
+            # Single number, assume it's MSB with LSB=0
+            try:
+                msb = int(width_clean)
+                return str(msb + 1)
+            except:
+                return "1"
+    
     def _generate_connection_name(self, connection_spec: str) -> str:
         """Generate connection name handling special cases and bit ranges"""
         # Handle special connections
@@ -1152,25 +1235,39 @@ class WrapperGenerator:
         if not module_match:
             return {}
         
-        # Extract parameter declarations from module header
+        # Extract parameter declarations from module header and body
         param_dict = {}
         clean_content = re.sub(r'\s+', ' ', content)
         
-        # Find parameters in module declaration
+        # Find parameters in module declaration header
         param_section_match = re.search(r'module\s+\w+\s*#\s*\((.*?)\)\s*\(', clean_content, re.DOTALL)
         if param_section_match:
             param_section = param_section_match.group(1)
             
-            # Parse parameter and localparam declarations
-            param_patterns = [
-                r'parameter\s+(\w+)\s*=\s*([^,)]+)',
-                r'localparam\s+(\w+)\s*=\s*([^,)]+)'
-            ]
+            # Enhanced parameter parsing that handles complex expressions
+            # This regex looks for parameter declarations and captures everything until the next parameter or end
+            param_pattern = r'(parameter|localparam)\s+(\w+)\s*=\s*([^,;]+?)(?=\s*[,;)]|\s*(?:parameter|localparam)\s+\w+\s*=|$)'
+            matches = re.findall(param_pattern, param_section, re.DOTALL)
             
-            for pattern in param_patterns:
-                matches = re.findall(pattern, param_section)
-                for param_name, param_value in matches:
-                    param_dict[param_name.strip()] = param_value.strip()
+            for param_type, param_name, param_value in matches:
+                # Clean up the parameter value
+                param_value = param_value.strip()
+                # Remove trailing comma if present
+                param_value = re.sub(r',$', '', param_value)
+                param_dict[param_name.strip()] = param_value
+        
+        # Also find parameters in module body (for cases where they are declared separately)
+        module_body_match = re.search(r'module\s+\w+[^;]*;\s*(.*?)\s*endmodule', clean_content, re.DOTALL)
+        if module_body_match:
+            module_body = module_body_match.group(1)
+            
+            # Find parameter declarations in module body
+            body_param_pattern = r'(parameter|localparam)\s+(\w+)\s*=\s*([^;]+);'
+            body_matches = re.findall(body_param_pattern, module_body, re.DOTALL)
+            
+            for param_type, param_name, param_value in body_matches:
+                param_value = param_value.strip()
+                param_dict[param_name.strip()] = param_value
         
         # Store original expressions for later dependency resolution
         self._original_expressions = {}
@@ -1194,12 +1291,23 @@ class WrapperGenerator:
             if not changes_made:
                 break
         
-        # Evaluate arithmetic expressions
+        # Enhanced evaluation of arithmetic expressions and conditional statements
         for param_name, param_value in param_dict.items():
             try:
-                if re.match(r'^[\d\+\-\*\/\(\)\s]+$', param_value):
+                # Handle conditional expressions (ternary operator)
+                if '?' in param_value and ':' in param_value:
+                    # Keep the original conditional expression for now
+                    # Complex conditional evaluation can be added later if needed
+                    pass
+                # Handle arithmetic expressions with basic operators
+                elif re.match(r'^[\d\+\-\*\/\(\)\s]+$', param_value):
                     param_dict[param_name] = str(eval(param_value))
+                # Handle hex, binary, and decimal values
+                elif re.match(r"^\d+'[hdob][0-9a-fA-F_]+$", param_value):
+                    # Keep verilog format values as-is
+                    pass
             except:
+                # If evaluation fails, keep the original expression
                 pass
         
         return param_dict
@@ -1427,6 +1535,28 @@ class WrapperGenerator:
         
         return formatted_wires
     
+    def _resolve_file_path(self, file_path: str) -> Optional[str]:
+        """Resolve file path by checking multiple locations"""
+        import os
+        
+        # Try current working directory
+        if os.path.exists(file_path):
+            return file_path
+        
+        # Try script directory (where verilog_wrapper_generator.py is located)
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        script_path = os.path.join(script_dir, file_path)
+        if os.path.exists(script_path):
+            return script_path
+        
+        # Try parent directory of current working directory
+        parent_dir = os.path.dirname(os.getcwd())
+        parent_path = os.path.join(parent_dir, file_path)
+        if os.path.exists(parent_path):
+            return parent_path
+        
+        return None
+    
     def _format_simple_wire_declarations(self, wire_list: List[str]) -> List[str]:
         """Format simple wire declarations with proper alignment"""
         if not wire_list:
@@ -1450,7 +1580,7 @@ class WrapperGenerator:
         
         return formatted_wires
     
-    def _generate_wrapper_code_advanced(self, top_module_name: str, instances: List[Instance], 
+    def _generate_wrapper_code_advanced(self, top_module_name: str, top_module_parameters: Dict[str, str], instances: List[Instance], 
                                       top_ports: List[Port], instance_connections: List[Dict], instance_to_top: Dict[str, str], instance_export_ports: List[Dict] = None) -> str:
         """Generate wrapper code with advanced configuration"""
         lines = []
@@ -1460,8 +1590,16 @@ class WrapperGenerator:
         unconnected_outputs = []
         unconnected_inouts = []
         
-        # Module declaration
-        lines.append(f"module {top_module_name} (")
+        # Module declaration with parameters
+        if top_module_parameters:
+            # Generate parameter declaration
+            param_list = []
+            for param_name, param_value in top_module_parameters.items():
+                param_list.append(f"parameter {param_name} = {param_value}")
+            param_str = f" #(\n    {',\n    '.join(param_list)}\n)"
+            lines.append(f"module {top_module_name}{param_str} (")
+        else:
+            lines.append(f"module {top_module_name} (")
         
         # Top-level ports with proper formatting
         if top_ports:
@@ -1582,27 +1720,7 @@ class WrapperGenerator:
                     width = self._substitute_parameters(port.width, instance_params) if port.width else None
                     internal_wires[wire_name] = width
                 
-                # Add unconnected wire only if port is not connected at all
-                if not is_directly_connected_to_top and not needs_wire:
-                    # Check if port is completely unconnected
-                    is_connected = False
-                    for mapped_port in instance_to_top.keys():
-                        if mapped_port.split('[')[0] == inst_port:
-                            is_connected = True
-                            break
-                    
-                    if not is_connected:
-                        for connection in instance_connections:
-                            if connection['source'].split('[')[0] == inst_port or connection['target'].split('[')[0] == inst_port:
-                                is_connected = True
-                                break
-                    
-                    if not is_connected:
-                        wire_name_unconnected = f"w_{instance.instance_name}_{port.name}_unconnected"
-                        if wire_name_unconnected not in top_port_names:
-                            # Substitute instance-specific parameter values in width
-                            width = self._substitute_parameters(port.width, instance_params) if port.width else None
-                            internal_wires[wire_name_unconnected] = width
+                # Don't create unconnected wires - handle unconnected ports directly in instance connections
         
         # Generate wire declarations
         if internal_wires:
@@ -1784,9 +1902,21 @@ class WrapperGenerator:
                                     connection_name = self._generate_wire_name(connection['source'], connection['target'])
                                 break
                         
-                        # If not connected, use internal wire and check for partial connections
+                        # If not connected, assign appropriate default values based on port direction
                         if connection_name is None:
-                            connection_name = f"w_{instance.instance_name}_{port.name}_unconnected"
+                            if port.direction == 'input':
+                                # For unconnected inputs, tie to appropriate default
+                                if port.width:
+                                    # Multi-bit input - tie to zero
+                                    width_value = self._get_port_width_value(port.width)
+                                    connection_name = f"{width_value}'b0"
+                                else:
+                                    # Single-bit input - tie to zero
+                                    connection_name = "1'b0"
+                            else:
+                                # For unconnected outputs/inouts, don't connect them
+                                # This is valid in Verilog - unconnected output ports are left open
+                                connection_name = None
                 
                 # Always analyze partial connections for multibit ports
                 if port.width:
@@ -1802,17 +1932,18 @@ class WrapperGenerator:
                                 unconnected_outputs.append(port_info)
                             elif port.direction == 'inout':
                                 unconnected_inouts.append(port_info)
-                elif connection_name and connection_name.endswith('_unconnected'):
-                    # Fully unconnected single-bit port
+                # Skip the old unconnected logic since we handle it differently now
+                
+                # Add port connection only if connection_name exists
+                if connection_name is not None:
+                    port_connections.append(f"        .{port.name}({connection_name})")
+                else:
+                    # Add to unconnected list for reporting
                     port_info = f"{instance.instance_name}.{port.name}"
-                    if port.direction == 'input':
-                        unconnected_inputs.append(port_info)
-                    elif port.direction == 'output':
+                    if port.direction == 'output':
                         unconnected_outputs.append(port_info)
                     elif port.direction == 'inout':
                         unconnected_inouts.append(port_info)
-                
-                port_connections.append(f"        .{port.name}({connection_name})")
             
             # Format port connections with proper alignment
             formatted_connections = self._format_instance_connections(instance, port_connections)
@@ -1936,7 +2067,7 @@ class WrapperGenerator:
 def main():
     """Main function for command-line interface"""
     parser = argparse.ArgumentParser(description='Generate Verilog wrapper files')
-    parser.add_argument('input_file', help='Input specification file (.txt) or JSON configuration file')
+    parser.add_argument('input_file', help='Input specification file (.cmd/.txt) or JSON configuration file')
     parser.add_argument('-o', '--output', help='Output file path')
     
     args = parser.parse_args()
@@ -1949,7 +2080,7 @@ def main():
         if os.path.isdir(args.input_file):
             # Configuration directory
             wrapper_code = generator.generate_wrapper_from_config(args.input_file)
-        elif args.input_file.endswith('.txt'):
+        elif args.input_file.endswith('.txt') or args.input_file.endswith('.cmd'):
             # Input specification file
             wrapper_code = generator.generate_wrapper_from_spec(args.input_file)
         else:

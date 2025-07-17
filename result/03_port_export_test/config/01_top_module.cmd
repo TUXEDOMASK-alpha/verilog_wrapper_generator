@@ -1,0 +1,2 @@
+[TOP_MODULE_NAME]
+port_export_test_top

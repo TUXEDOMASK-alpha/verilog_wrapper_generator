@@ -1,7 +1,0 @@
-# Instance Configuration with various connection types
-# Format: instance_name | file_path | module_name | parameters
-
-[INSTANCES]
-adder1 | multi_module_test.v | simple_adder | WIDTH=8
-adder2 | multi_module_test.v | simple_adder | WIDTH=8
-counter1 | multi_module_test.v | counter | WIDTH=4

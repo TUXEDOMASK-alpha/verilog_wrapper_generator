@@ -1,6 +1,0 @@
-# Test Instances Configuration
-
-[INSTANCES]
-# 인스턴스명 | 모듈파일 | 파라미터
-test_inst1 | test_module_with_many_ports.v |
-test_inst2 | test_module_with_many_ports.v |

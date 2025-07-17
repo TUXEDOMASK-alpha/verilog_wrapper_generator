@@ -1,0 +1,250 @@
+/* Verilog Wrapper Generator Web GUI Styles */
+
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.navbar-brand {
+    font-weight: 600;
+}
+
+.navbar-brand i {
+    color: #17a2b8;
+}
+
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.card-header {
+    background-color: #fff;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.nav-tabs .nav-link {
+    border: none;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.nav-tabs .nav-link.active {
+    color: #495057;
+    background-color: #fff;
+    border-bottom: 2px solid #007bff;
+}
+
+.nav-tabs .nav-link:hover {
+    color: #007bff;
+    border-color: transparent;
+}
+
+.config-editor {
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.4;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    resize: vertical;
+    min-height: 400px;
+}
+
+.config-editor:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+#wrapperPreview {
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.3;
+    background-color: #2d3748;
+    color: #e2e8f0;
+    border-radius: 0;
+    resize: none;
+    height: 600px;
+}
+
+#statusPanel {
+    background-color: #f8f9fa;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+}
+
+#statusIcon .fa-circle.text-success {
+    color: #28a745 !important;
+}
+
+#statusIcon .fa-circle.text-danger {
+    color: #dc3545 !important;
+}
+
+#statusIcon .fa-circle.text-warning {
+    color: #ffc107 !important;
+}
+
+#statusIcon .fa-circle.text-secondary {
+    color: #6c757d !important;
+}
+
+.status-loading {
+    animation: pulse 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes pulse {
+    from { opacity: 0.6; }
+    to { opacity: 1; }
+}
+
+.btn-group .btn {
+    font-size: 0.875rem;
+}
+
+.tab-content {
+    padding-top: 1rem;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #495057;
+}
+
+.form-label i {
+    color: #007bff;
+    margin-right: 0.25rem;
+}
+
+.text-muted {
+    font-size: 0.875rem;
+}
+
+/* Error panel styles */
+#errorPanel .card-header {
+    background-color: #fff3cd;
+    border-color: #ffeaa7;
+}
+
+#errorContent {
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 12px;
+    white-space: pre-line;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container-fluid {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+    
+    .col-md-8, .col-md-4 {
+        margin-bottom: 1rem;
+    }
+    
+    .nav-tabs .nav-link {
+        font-size: 0.875rem;
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .config-editor {
+        min-height: 300px;
+    }
+    
+    #wrapperPreview {
+        height: 400px;
+    }
+}
+
+/* Code highlighting for config files */
+.config-section {
+    color: #0066cc;
+    font-weight: bold;
+}
+
+.config-comment {
+    color: #008000;
+    font-style: italic;
+}
+
+.config-value {
+    color: #cc0000;
+}
+
+/* Toolbar styles */
+.toolbar {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    padding: 0.5rem 1rem;
+}
+
+.toolbar .btn {
+    font-size: 0.875rem;
+    margin-right: 0.25rem;
+}
+
+/* Animation for status changes */
+.status-transition {
+    transition: all 0.3s ease-in-out;
+}
+
+/* Loading spinner overlay */
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+/* Syntax highlighting improvements */
+.syntax-error {
+    background-color: #f8d7da;
+    border-left: 3px solid #dc3545;
+    padding-left: 0.5rem;
+}
+
+.syntax-warning {
+    background-color: #fff3cd;
+    border-left: 3px solid #ffc107;
+    padding-left: 0.5rem;
+}
+
+/* Button states */
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-loading {
+    position: relative;
+}
+
+.btn-loading::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}

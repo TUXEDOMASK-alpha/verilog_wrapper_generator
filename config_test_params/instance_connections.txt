@@ -1,4 +1,0 @@
-# Instance Connections for Parameter Test
-
-[INSTANCE_CONNECTIONS]
-# No instance-to-instance connections for this test

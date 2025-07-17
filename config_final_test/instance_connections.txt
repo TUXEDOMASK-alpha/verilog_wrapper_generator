@@ -1,6 +1,0 @@
-# Instance Connections with Partial Bits
-
-[INSTANCE_CONNECTIONS]
-# Partial instance-to-instance connections
-test_inst1.ready -> test_inst2.control[1]
-test_inst1.status[3:2] -> test_inst2.data_in[1:0]

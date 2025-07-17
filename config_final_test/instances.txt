@@ -1,5 +1,0 @@
-# Final Comprehensive Test
-
-[INSTANCES]
-test_inst1 | test_module_with_many_ports.v
-test_inst2 | test_module_with_many_ports.v

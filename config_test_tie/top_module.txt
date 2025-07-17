@@ -1,4 +1,0 @@
-# Test Configuration for TIE and Unconnected Ports
-
-[TOP_MODULE_NAME]
-test_tie_system

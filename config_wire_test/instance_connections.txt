@@ -1,6 +1,0 @@
-# Instance Connections (wire needed)
-# Format: source_instance.port -> target_instance.port
-
-[INSTANCE_CONNECTIONS]
-# Instance-to-instance connection (wire needed)
-adder2.sum -> counter1.enable

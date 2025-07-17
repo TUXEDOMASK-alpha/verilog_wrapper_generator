@@ -1,0 +1,20 @@
+[INSTANCE_TO_TOP]
+cpu_core.clk -> sys_clk
+cpu_core.reset -> sys_reset
+main_memory.clk -> sys_clk
+main_memory.reset -> sys_reset
+main_memory.external_bus -> external_bus
+cache_ctrl.clk -> sys_clk
+cache_ctrl.reset -> sys_reset
+uart_if.clk -> sys_clk
+uart_if.reset -> sys_reset
+uart_if.tx_data -> uart_tx_data
+uart_if.tx_valid -> uart_tx_valid
+uart_if.rx_data -> uart_rx_data
+uart_if.rx_valid -> uart_rx_valid
+adder_unit.a -> adder_input_a
+adder_unit.b -> adder_input_b
+adder_unit.sum -> adder_result
+counter_inst.clk -> sys_clk
+counter_inst.reset -> sys_reset
+counter_inst.count -> counter_output

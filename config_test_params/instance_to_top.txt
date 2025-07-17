@@ -1,9 +1,0 @@
-# Instance to Top Mapping for Parameter Test
-
-[INSTANCE_TO_TOP]
-param_inst.clk -> sys_clk
-param_inst.reset -> sys_reset
-param_inst.data_in -> sys_data_in
-param_inst.addr -> sys_addr
-param_inst.data_out -> sys_data_out
-param_inst.ready -> sys_ready

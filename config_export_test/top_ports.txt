@@ -1,6 +1,0 @@
-# Top Level Ports Configuration
-# Format: direction | width | port_name
-
-[TOP_PORTS]
-input | [7:0] | sys_a
-input | [7:0] | sys_b

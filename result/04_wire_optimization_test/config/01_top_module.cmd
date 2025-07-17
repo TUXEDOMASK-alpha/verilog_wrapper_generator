@@ -1,0 +1,2 @@
+[TOP_MODULE_NAME]
+wire_optimization_test

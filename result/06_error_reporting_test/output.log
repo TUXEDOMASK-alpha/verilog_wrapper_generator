@@ -1,0 +1,11 @@
+WARNING [PARAMETER_NOT_FOUND]: Parameter 'INVALID_PARAM' not found in module 'cpu'
+  Config line: cpu1 | cpu.v | cpu | DATA_WIDTH=32, ADDR_WIDTH=16, INVALID_PARAM=123
+ERROR [FILE_NOT_FOUND]: Verilog file 'nonexistent_module.v' does not exist
+  Config line: nonexistent_inst | nonexistent_module.v | fake_module | PARAM1=1
+WARNING [PARAMETER_NOT_FOUND]: Parameter 'CACHE_SIZE' not found in module 'cpu'
+  Config line: cpu2 | cpu.v | cpu | CACHE_SIZE=1024
+
+Error report saved to: ./rpt/Error_report.list
+
+Validation failed. Found 1 error(s) and 2 warning(s).
+Error: Wrapper generation failed due to validation errors.

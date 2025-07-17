@@ -1,5 +1,0 @@
-# Test Instance Connections (minimal)
-
-[INSTANCE_CONNECTIONS]
-# 최소한의 연결만 정의
-test_inst1.ready -> test_inst2.enable

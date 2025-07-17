@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verilog Wrapper Generator - Web GUI</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- CodeMirror CSS for syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/theme/material-darker.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container-fluid">
+            <span class="navbar-brand mb-0 h1">
+                <i class="fas fa-microchip"></i>
+                Verilog Wrapper Generator
+            </span>
+            <div class="d-flex">
+                <button class="btn btn-outline-light me-2" id="loadConfigBtn">
+                    <i class="fas fa-folder-open"></i> Load Config
+                </button>
+                <button class="btn btn-outline-success me-2" id="saveConfigBtn">
+                    <i class="fas fa-save"></i> Save Config
+                </button>
+                <button class="btn btn-primary" id="generateBtn">
+                    <i class="fas fa-cogs"></i> Generate Wrapper
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-3">
+        <div class="row">
+            <!-- Configuration Panel -->
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <ul class="nav nav-tabs card-header-tabs" id="configTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="top-module-tab" data-bs-toggle="tab" 
+                                        data-bs-target="#top-module" type="button" role="tab">
+                                    <i class="fas fa-cube"></i> Top Module
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="instances-tab" data-bs-toggle="tab" 
+                                        data-bs-target="#instances" type="button" role="tab">
+                                    <i class="fas fa-boxes"></i> Instances
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="top-ports-tab" data-bs-toggle="tab" 
+                                        data-bs-target="#top-ports" type="button" role="tab">
+                                    <i class="fas fa-plug"></i> Top Ports
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="port-mapping-tab" data-bs-toggle="tab" 
+                                        data-bs-target="#port-mapping" type="button" role="tab">
+                                    <i class="fas fa-arrows-alt-h"></i> Port Mapping
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="connections-tab" data-bs-toggle="tab" 
+                                        data-bs-target="#connections" type="button" role="tab">
+                                    <i class="fas fa-project-diagram"></i> Connections
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="export-ports-tab" data-bs-toggle="tab" 
+                                        data-bs-target="#export-ports" type="button" role="tab">
+                                    <i class="fas fa-share-alt"></i> Export Ports
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content" id="configTabContent">
+                            <!-- Top Module Tab -->
+                            <div class="tab-pane fade show active" id="top-module" role="tabpanel">
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <i class="fas fa-info-circle"></i> 
+                                        Top Module Configuration
+                                    </label>
+                                    <small class="text-muted d-block">
+                                        탑 모듈의 이름과 파라미터를 설정합니다.
+                                    </small>
+                                </div>
+                                <textarea id="topModuleEditor" class="form-control config-editor" rows="15"
+                                          placeholder="Top module configuration will be loaded here..."></textarea>
+                            </div>
+
+                            <!-- Instances Tab -->
+                            <div class="tab-pane fade" id="instances" role="tabpanel">
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <i class="fas fa-info-circle"></i> 
+                                        Instance Configuration
+                                    </label>
+                                    <small class="text-muted d-block">
+                                        인스턴스화할 모듈들을 설정합니다. 형식: 인스턴스명 | 모듈파일 | [모듈명] | [파라미터]
+                                    </small>
+                                </div>
+                                <textarea id="instancesEditor" class="form-control config-editor" rows="15"
+                                          placeholder="Instance configuration will be loaded here..."></textarea>
+                            </div>
+
+                            <!-- Top Ports Tab -->
+                            <div class="tab-pane fade" id="top-ports" role="tabpanel">
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <i class="fas fa-info-circle"></i> 
+                                        Top Module Ports
+                                    </label>
+                                    <small class="text-muted d-block">
+                                        탑 모듈의 포트를 정의합니다. 형식: 방향 | 포트폭 | 포트명
+                                    </small>
+                                </div>
+                                <textarea id="topPortsEditor" class="form-control config-editor" rows="15"
+                                          placeholder="Top ports configuration will be loaded here..."></textarea>
+                            </div>
+
+                            <!-- Port Mapping Tab -->
+                            <div class="tab-pane fade" id="port-mapping" role="tabpanel">
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <i class="fas fa-info-circle"></i> 
+                                        Instance to Top Port Mapping
+                                    </label>
+                                    <small class="text-muted d-block">
+                                        인스턴스 포트를 탑 모듈 포트로 연결합니다. 형식: 인스턴스명.포트명 -> 탑포트명
+                                    </small>
+                                </div>
+                                <textarea id="portMappingEditor" class="form-control config-editor" rows="15"
+                                          placeholder="Port mapping configuration will be loaded here..."></textarea>
+                            </div>
+
+                            <!-- Connections Tab -->
+                            <div class="tab-pane fade" id="connections" role="tabpanel">
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <i class="fas fa-info-circle"></i> 
+                                        Instance Connections
+                                    </label>
+                                    <small class="text-muted d-block">
+                                        인스턴스들 간의 연결을 정의합니다. 형식: 인스턴스명.포트명 -> 인스턴스명.포트명
+                                    </small>
+                                </div>
+                                <textarea id="connectionsEditor" class="form-control config-editor" rows="15"
+                                          placeholder="Connections configuration will be loaded here..."></textarea>
+                            </div>
+
+                            <!-- Export Ports Tab -->
+                            <div class="tab-pane fade" id="export-ports" role="tabpanel">
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <i class="fas fa-info-circle"></i> 
+                                        Instance Port Export
+                                    </label>
+                                    <small class="text-muted d-block">
+                                        인스턴스 포트를 직접 탑 모듈로 노출합니다. 형식: 인스턴스명.포트명 [-> 새로운포트명]
+                                    </small>
+                                </div>
+                                <textarea id="exportPortsEditor" class="form-control config-editor" rows="15"
+                                          placeholder="Export ports configuration will be loaded here..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preview Panel -->
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0">
+                                <i class="fas fa-eye"></i> Live Preview
+                            </h6>
+                            <div>
+                                <button class="btn btn-sm btn-outline-primary" id="validateBtn" title="Validate Configuration">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-success" id="downloadBtn" title="Download Wrapper" disabled>
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <!-- Status Panel -->
+                        <div id="statusPanel" class="border-bottom p-3">
+                            <div class="d-flex align-items-center">
+                                <div id="statusIcon" class="me-2">
+                                    <i class="fas fa-circle text-secondary"></i>
+                                </div>
+                                <div id="statusText">Ready</div>
+                            </div>
+                        </div>
+
+                        <!-- Wrapper Code Preview -->
+                        <div class="p-0">
+                            <textarea id="wrapperPreview" class="form-control border-0" rows="25" readonly
+                                      placeholder="Generated wrapper code will appear here..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Error/Warning Panel -->
+                <div class="card mt-3" id="errorPanel" style="display: none;">
+                    <div class="card-header bg-warning">
+                        <h6 class="mb-0">
+                            <i class="fas fa-exclamation-triangle"></i> Issues
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div id="errorContent"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Modal -->
+    <div class="modal fade" id="loadingModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body text-center">
+                    <div class="spinner-border text-primary mb-3" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div>Processing...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- CodeMirror JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/properties/properties.min.js"></script>
+    
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

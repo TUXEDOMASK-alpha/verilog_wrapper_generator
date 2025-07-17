@@ -1,4 +1,0 @@
-# Test Configuration for Unconnected Ports Only
-
-[TOP_MODULE_NAME]
-test_unconnected_system

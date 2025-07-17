@@ -1,4 +1,0 @@
-# Top Module Name Configuration
-
-[TOP_MODULE_NAME]
-wire_test_wrapper
