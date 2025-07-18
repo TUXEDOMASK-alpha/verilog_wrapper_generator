@@ -136,31 +136,140 @@ class VerilogParser:
         # Remove all whitespace and newlines for easier parsing
         clean_content = re.sub(r'\s+', ' ', content)
         
-        # Try different patterns in order of complexity
-        patterns = [
-            # Pattern 1: module with parameters
-            r'module\s+(\w+)\s*#\s*\([^)]*\)\s*\((.*?)\);',
-            # Pattern 2: module without parameters
-            r'module\s+(\w+)\s*\((.*?)\);',
-        ]
+        # Look for module keyword
+        module_match = re.search(r'module\s+(\w+)', clean_content)
+        if not module_match:
+            return None
         
-        for pattern in patterns:
-            match = re.search(pattern, clean_content, re.DOTALL)
-            if match:
-                return (match.group(1), match.group(2))
+        module_name = module_match.group(1)
         
-        return None
+        # Find the start of module declaration
+        module_start = module_match.start()
+        
+        # Look for parameter section (optional)
+        param_start = clean_content.find('#', module_start)
+        if param_start != -1:
+            # Module has parameters, find the end of parameter section
+            paren_start = clean_content.find('(', param_start)
+            if paren_start == -1:
+                return None
+            
+            # Find matching closing parenthesis for parameters
+            paren_count = 1
+            i = paren_start + 1
+            while i < len(clean_content) and paren_count > 0:
+                if clean_content[i] == '(':
+                    paren_count += 1
+                elif clean_content[i] == ')':
+                    paren_count -= 1
+                i += 1
+            
+            if paren_count > 0:
+                return None  # Unmatched parentheses
+            
+            # Find port section start
+            port_start = clean_content.find('(', i)
+        else:
+            # No parameters, find port section directly
+            port_start = clean_content.find('(', module_start)
+        
+        if port_start == -1:
+            return None
+        
+        # Find the end of port section
+        paren_count = 1
+        i = port_start + 1
+        while i < len(clean_content) and paren_count > 0:
+            if clean_content[i] == '(':
+                paren_count += 1
+            elif clean_content[i] == ')':
+                paren_count -= 1
+            i += 1
+        
+        if paren_count > 0:
+            return None  # Unmatched parentheses
+        
+        # Check if followed by semicolon
+        j = i
+        while j < len(clean_content) and clean_content[j].isspace():
+            j += 1
+        
+        if j >= len(clean_content) or clean_content[j] != ';':
+            return None
+        
+        # Extract port section
+        port_section = clean_content[port_start + 1:i - 1]
+        
+        return (module_name, port_section)
     
     def _find_specific_module(self, content: str, target_module_name: str) -> Optional[tuple]:
         """Find a specific module declaration by name"""
-        # Find the target module considering the entire module block
-        module_pattern = rf'module\s+{re.escape(target_module_name)}\s*(?:#\s*\([^)]*\))?\s*\((.*?)\);'
+        # Use the same robust parsing logic as _find_module_declaration
+        clean_content = re.sub(r'\s+', ' ', content)
         
-        match = re.search(module_pattern, content, re.DOTALL | re.MULTILINE)
-        if match:
-            return (target_module_name, match.group(1))
+        # Look for the specific module
+        module_pattern = rf'module\s+{re.escape(target_module_name)}\b'
+        module_match = re.search(module_pattern, clean_content)
+        if not module_match:
+            return None
         
-        return None
+        module_start = module_match.start()
+        
+        # Look for parameter section (optional)
+        param_start = clean_content.find('#', module_start)
+        if param_start != -1:
+            # Module has parameters, find the end of parameter section
+            paren_start = clean_content.find('(', param_start)
+            if paren_start == -1:
+                return None
+            
+            # Find matching closing parenthesis for parameters
+            paren_count = 1
+            i = paren_start + 1
+            while i < len(clean_content) and paren_count > 0:
+                if clean_content[i] == '(':
+                    paren_count += 1
+                elif clean_content[i] == ')':
+                    paren_count -= 1
+                i += 1
+            
+            if paren_count > 0:
+                return None  # Unmatched parentheses
+            
+            # Find port section start
+            port_start = clean_content.find('(', i)
+        else:
+            # No parameters, find port section directly
+            port_start = clean_content.find('(', module_start)
+        
+        if port_start == -1:
+            return None
+        
+        # Find the end of port section
+        paren_count = 1
+        i = port_start + 1
+        while i < len(clean_content) and paren_count > 0:
+            if clean_content[i] == '(':
+                paren_count += 1
+            elif clean_content[i] == ')':
+                paren_count -= 1
+            i += 1
+        
+        if paren_count > 0:
+            return None  # Unmatched parentheses
+        
+        # Check if followed by semicolon
+        j = i
+        while j < len(clean_content) and clean_content[j].isspace():
+            j += 1
+        
+        if j >= len(clean_content) or clean_content[j] != ';':
+            return None
+        
+        # Extract port section
+        port_section = clean_content[port_start + 1:i - 1]
+        
+        return (target_module_name, port_section)
     
     def parse_module(self, file_path: str, target_module_name: str = None) -> Module:
         """Parse a Verilog file and extract module information
@@ -1233,7 +1342,10 @@ class WrapperGenerator:
         # Find module declaration with parameters
         module_match = self.parser._find_module_declaration(content)
         if not module_match:
-            return {}
+            # Try to find module declaration manually as fallback
+            module_fallback_match = re.search(r'module\s+\w+', content)
+            if not module_fallback_match:
+                return {}
         
         # Extract parameter declarations from module header and body
         param_dict = {}
@@ -1244,24 +1356,16 @@ class WrapperGenerator:
         if param_section_match:
             param_section = param_section_match.group(1)
             
-            # Enhanced parameter parsing that handles complex expressions
-            # This regex looks for parameter declarations and captures everything until the next parameter or end
-            param_pattern = r'(parameter|localparam)\s+(\w+)\s*=\s*([^,;]+?)(?=\s*[,;)]|\s*(?:parameter|localparam)\s+\w+\s*=|$)'
-            matches = re.findall(param_pattern, param_section, re.DOTALL)
-            
-            for param_type, param_name, param_value in matches:
-                # Clean up the parameter value
-                param_value = param_value.strip()
-                # Remove trailing comma if present
-                param_value = re.sub(r',$', '', param_value)
-                param_dict[param_name.strip()] = param_value
+            # Enhanced parameter parsing using manual parsing to handle complex expressions
+            # Split by commas first, then parse each declaration
+            param_dict.update(self._parse_parameter_declarations(param_section))
         
         # Also find parameters in module body (for cases where they are declared separately)
         module_body_match = re.search(r'module\s+\w+[^;]*;\s*(.*?)\s*endmodule', clean_content, re.DOTALL)
         if module_body_match:
             module_body = module_body_match.group(1)
             
-            # Find parameter declarations in module body
+            # Find parameter declarations in module body - improved to handle complex expressions
             body_param_pattern = r'(parameter|localparam)\s+(\w+)\s*=\s*([^;]+);'
             body_matches = re.findall(body_param_pattern, module_body, re.DOTALL)
             
@@ -1274,43 +1378,220 @@ class WrapperGenerator:
         for param_name, param_value in param_dict.items():
             self._original_expressions[param_name] = param_value
         
-        # Resolve parameter dependencies (local parameters that reference other parameters)
-        max_iterations = 10  # Prevent infinite loops
-        for _ in range(max_iterations):
-            changes_made = False
-            for param_name, param_value in param_dict.items():
-                # Check if this parameter value references other parameters
-                for other_param, other_value in param_dict.items():
-                    if other_param != param_name and re.search(r'\b' + other_param + r'\b', param_value):
-                        # Replace parameter reference with its value
-                        new_value = re.sub(r'\b' + other_param + r'\b', other_value, param_value)
-                        if new_value != param_value:
-                            param_dict[param_name] = new_value
-                            changes_made = True
-            
-            if not changes_made:
-                break
+        # Improved parameter dependency resolution with better ordering
+        resolved_params = self._resolve_parameter_dependencies_improved(param_dict)
         
-        # Enhanced evaluation of arithmetic expressions and conditional statements
+        return resolved_params
+    
+    def _parse_parameter_declarations(self, param_section: str) -> Dict[str, str]:
+        """Parse parameter declarations from a section, handling complex expressions properly"""
+        param_dict = {}
+        
+        # Remove extra spaces
+        param_section = param_section.strip()
+        
+        # Manual parsing to handle complex expressions with nested parentheses
+        i = 0
+        while i < len(param_section):
+            # Skip whitespace
+            while i < len(param_section) and param_section[i].isspace():
+                i += 1
+            
+            if i >= len(param_section):
+                break
+                
+            # Look for parameter or localparam keyword
+            if param_section[i:].startswith('parameter'):
+                param_type = 'parameter'
+                i += 9  # len('parameter')
+            elif param_section[i:].startswith('localparam'):
+                param_type = 'localparam'
+                i += 10  # len('localparam')
+            else:
+                # Skip unexpected characters
+                i += 1
+                continue
+            
+            # Skip whitespace
+            while i < len(param_section) and param_section[i].isspace():
+                i += 1
+            
+            # Extract parameter name
+            param_name_start = i
+            while i < len(param_section) and (param_section[i].isalnum() or param_section[i] == '_'):
+                i += 1
+            
+            if param_name_start == i:
+                continue  # No valid parameter name found
+                
+            param_name = param_section[param_name_start:i]
+            
+            # Skip whitespace and '='
+            while i < len(param_section) and param_section[i].isspace():
+                i += 1
+            
+            if i >= len(param_section) or param_section[i] != '=':
+                continue  # No '=' found
+                
+            i += 1  # Skip '='
+            
+            # Skip whitespace
+            while i < len(param_section) and param_section[i].isspace():
+                i += 1
+            
+            # Extract parameter value until next parameter declaration or end
+            param_value_start = i
+            paren_depth = 0
+            
+            while i < len(param_section):
+                char = param_section[i]
+                
+                if char == '(':
+                    paren_depth += 1
+                elif char == ')':
+                    paren_depth -= 1
+                elif char == ',' and paren_depth == 0:
+                    # Found comma at top level, this ends the parameter value
+                    break
+                    
+                i += 1
+            
+            param_value = param_section[param_value_start:i].strip()
+            
+            # Remove trailing comma if present
+            param_value = re.sub(r',$', '', param_value)
+            
+            param_dict[param_name] = param_value
+            
+            # Skip the comma if present
+            if i < len(param_section) and param_section[i] == ',':
+                i += 1
+        
+        return param_dict
+    
+    def _resolve_parameter_dependencies_improved(self, param_dict: Dict[str, str]) -> Dict[str, str]:
+        """Improved parameter dependency resolution with topological sorting"""
+        # Create dependency graph
+        dependencies = {}
         for param_name, param_value in param_dict.items():
+            deps = set()
+            for other_param in param_dict.keys():
+                if other_param != param_name and re.search(r'\b' + other_param + r'\b', param_value):
+                    deps.add(other_param)
+            dependencies[param_name] = deps
+        
+        # Topological sort to resolve dependencies in correct order
+        resolved_params = {}
+        visited = set()
+        temp_visited = set()
+        
+        def resolve_param(param_name):
+            if param_name in temp_visited:
+                # Circular dependency - keep original expression
+                resolved_params[param_name] = param_dict[param_name]
+                return
+            if param_name in visited:
+                return
+            
+            temp_visited.add(param_name)
+            
+            # First resolve all dependencies
+            for dep in dependencies.get(param_name, set()):
+                if dep not in visited:
+                    resolve_param(dep)
+            
+            # Now resolve this parameter
+            param_value = param_dict[param_name]
+            
+            # Substitute resolved parameters
+            for dep in dependencies.get(param_name, set()):
+                if dep in resolved_params:
+                    param_value = re.sub(r'\b' + dep + r'\b', resolved_params[dep], param_value)
+            
+            # Try to evaluate the expression
             try:
                 # Handle conditional expressions (ternary operator)
                 if '?' in param_value and ':' in param_value:
-                    # Keep the original conditional expression for now
-                    # Complex conditional evaluation can be added later if needed
-                    pass
+                    # For simple conditional expressions, try to evaluate
+                    # Handle both (condition) ? true : false and condition ? true : false
+                    ternary_match = re.match(r'^\s*\(?([^)]+)\)?\s*\?\s*([^:]+)\s*:\s*(.+)$', param_value)
+                    if ternary_match:
+                        condition, true_val, false_val = ternary_match.groups()
+                        # Try to evaluate condition
+                        try:
+                            # Replace system functions with placeholders for evaluation
+                            eval_condition = condition.strip()
+                            # Handle $clog2 function properly
+                            def replace_clog2(match):
+                                arg = match.group(1).strip()
+                                try:
+                                    # Try to evaluate the argument
+                                    arg_val = eval(arg)
+                                    import math
+                                    return str(int(math.ceil(math.log2(arg_val))) if arg_val > 0 else 1)
+                                except:
+                                    return '6'  # Default placeholder
+                            eval_condition = re.sub(r'\$clog2\(([^)]+)\)', replace_clog2, eval_condition)
+                            eval_condition = re.sub(r'<<', '**', eval_condition)  # Bit shift to power
+                            
+                            if eval(eval_condition):
+                                param_value = true_val.strip()
+                            else:
+                                param_value = false_val.strip()
+                            
+                            # If the result still contains expressions, try to evaluate them
+                            if '$clog2' in param_value:
+                                param_value = re.sub(r'\$clog2\(([^)]+)\)', replace_clog2, param_value)
+                            if re.match(r'^[\d\+\-\*\/\(\)\s]+$', param_value):
+                                param_value = str(eval(param_value))
+                                
+                        except:
+                            # Keep original expression if evaluation fails
+                            pass
+                    
+                    # Update resolved_params with the final value
+                    resolved_params[param_name] = param_value
+                
                 # Handle arithmetic expressions with basic operators
-                elif re.match(r'^[\d\+\-\*\/\(\)\s]+$', param_value):
-                    param_dict[param_name] = str(eval(param_value))
-                # Handle hex, binary, and decimal values
-                elif re.match(r"^\d+'[hdob][0-9a-fA-F_]+$", param_value):
-                    # Keep verilog format values as-is
-                    pass
+                elif re.match(r'^[\d\+\-\*\/\(\)\s<<>>]+$', param_value):
+                    # Replace bit shift with power for evaluation
+                    eval_expr = param_value.replace('<<', '**')
+                    eval_expr = re.sub(r'(\d+)\s*\*\*\s*(\d+)', lambda m: str(1 << int(m.group(2))), eval_expr)
+                    resolved_params[param_name] = str(eval(eval_expr))
+                # Handle system functions
+                elif '$clog2' in param_value:
+                    # Handle $clog2 function
+                    def replace_clog2(match):
+                        arg = match.group(1).strip()
+                        try:
+                            # Try to evaluate the argument
+                            arg_val = eval(arg)
+                            import math
+                            return str(int(math.ceil(math.log2(arg_val))) if arg_val > 0 else 1)
+                        except:
+                            return '6'  # Default placeholder
+                    eval_expr = re.sub(r'\$clog2\(([^)]+)\)', replace_clog2, param_value)
+                    # Try to evaluate the result
+                    try:
+                        resolved_params[param_name] = str(eval(eval_expr))
+                    except:
+                        resolved_params[param_name] = param_value
+                else:
+                    # Keep as-is for complex expressions
+                    resolved_params[param_name] = param_value
             except:
                 # If evaluation fails, keep the original expression
-                pass
+                resolved_params[param_name] = param_value
+            
+            temp_visited.remove(param_name)
+            visited.add(param_name)
         
-        return param_dict
+        # Resolve all parameters
+        for param_name in param_dict.keys():
+            if param_name not in visited:
+                resolve_param(param_name)
+        
+        return resolved_params
     
     def _resolve_parameter_dependencies(self, param_dict: Dict[str, str]) -> Dict[str, str]:
         """Resolve parameter dependencies in parameter dictionary using original expressions"""
@@ -1590,11 +1871,54 @@ class WrapperGenerator:
         unconnected_outputs = []
         unconnected_inouts = []
         
+        # Collect all parameters needed for port widths from instances
+        all_instance_params = {}
+        for instance in instances:
+            module_params = self._extract_parameters_from_module(instance.module.file_path)
+            # Create instance-specific parameter dict with overrides
+            instance_params = module_params.copy()
+            if instance.parameters:
+                for param_name, param_value in instance.parameters.items():
+                    instance_params[param_name] = param_value
+            # Re-evaluate local parameters with instance-specific values
+            instance_params = self._resolve_parameter_dependencies_improved(instance_params)
+            all_instance_params.update(instance_params)
+        
+        # Find parameters referenced in port widths
+        port_width_params = set()
+        for port in top_ports:
+            if port.width and port.width.strip():
+                # Find parameter references in width specification
+                width_text = port.width.strip('[]')
+                # Find all identifiers that could be parameters
+                param_refs = re.findall(r'\b[A-Z_][A-Z0-9_]*\b', width_text)
+                for param_ref in param_refs:
+                    if param_ref in all_instance_params:
+                        port_width_params.add(param_ref)
+        
+        # Add missing parameters to top module parameters
+        enhanced_top_params = top_module_parameters.copy() if top_module_parameters else {}
+        for param_name in port_width_params:
+            if param_name not in enhanced_top_params and param_name in all_instance_params:
+                # Use the evaluated value instead of the original expression for port width parameters
+                param_value = all_instance_params[param_name]
+                # If it's a simple numeric value, use it directly
+                try:
+                    # Try to convert to int first, then to string
+                    if isinstance(param_value, (int, float)):
+                        enhanced_top_params[param_name] = str(int(param_value))
+                    elif param_value.isdigit():
+                        enhanced_top_params[param_name] = param_value
+                    else:
+                        enhanced_top_params[param_name] = param_value
+                except:
+                    enhanced_top_params[param_name] = param_value
+        
         # Module declaration with parameters
-        if top_module_parameters:
+        if enhanced_top_params:
             # Generate parameter declaration
             param_list = []
-            for param_name, param_value in top_module_parameters.items():
+            for param_name, param_value in enhanced_top_params.items():
                 param_list.append(f"parameter {param_name} = {param_value}")
             newline = '\n'
             param_str = f" #({newline}    {f',{newline}    '.join(param_list)}{newline})"
@@ -1628,7 +1952,7 @@ class WrapperGenerator:
                     instance_params[param_name] = param_value
             
             # Re-evaluate local parameters with instance-specific values
-            instance_params = self._resolve_parameter_dependencies(instance_params)
+            instance_params = self._resolve_parameter_dependencies_improved(instance_params)
             
             # Update global parameter values
             param_values.update(instance_params)

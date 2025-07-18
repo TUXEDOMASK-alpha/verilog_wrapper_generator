@@ -6,7 +6,9 @@
 # 방향 | 포트폭 | 포트명  
 input | | clk
 input | | reset
-input | [DATA_WIDTH-1:0] | data_in
-input | [ADDR_WIDTH-1:0] | addr
-output | [DATA_WIDTH-1:0] | data_out
-output | | valid
+input | [L-1:0] | i_port1
+input | [M-1:0] | i_port2
+input | [N-1:0] | i_port3
+output | [L-1:0] | o_port1
+output | [M-1:0] | o_port2
+output | [P-1:0] | o_port3

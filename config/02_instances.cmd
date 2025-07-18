@@ -4,4 +4,4 @@
 
 [INSTANCES]
 # 인스턴스명 | 모듈파일 | 모듈명(선택) | 파라미터(선택)
-test_inst | test_module.v | test_module | DATA_WIDTH=8,ADDR_WIDTH=4
+mixed_inst | mixed_param_module.v | mixed_param_module | A=20,B=16

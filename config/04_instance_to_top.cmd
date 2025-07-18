@@ -4,9 +4,11 @@
 
 [INSTANCE_TO_TOP]
 # Connect instance ports to top module ports
-test_inst.clk -> clk
-test_inst.reset -> reset
-test_inst.data_in -> data_in
-test_inst.addr -> addr
-test_inst.data_out -> data_out
-test_inst.valid -> valid
+mixed_inst.clk -> clk
+mixed_inst.reset -> reset
+mixed_inst.i_port1 -> i_port1
+mixed_inst.i_port2 -> i_port2
+mixed_inst.i_port3 -> i_port3
+mixed_inst.o_port1 -> o_port1
+mixed_inst.o_port2 -> o_port2
+mixed_inst.o_port3 -> o_port3
