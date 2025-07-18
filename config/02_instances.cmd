@@ -4,4 +4,5 @@
 
 [INSTANCES]
 # 인스턴스명 | 모듈파일 | 모듈명(선택) | 파라미터(선택)
-mixed_inst | mixed_param_module.v | mixed_param_module | A=20,B=16
+cpu_inst | cpu_module.v | cpu_module | DATA_WIDTH=32,ADDR_WIDTH=16
+mem_inst | memory_module.v | memory_module | DATA_WIDTH=32,ADDR_WIDTH=16

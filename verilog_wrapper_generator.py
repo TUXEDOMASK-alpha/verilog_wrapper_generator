@@ -806,6 +806,7 @@ class WrapperGenerator:
         self.parser = VerilogParser()
         self.config_parser = ConfigParser()
         self.error_reporter = ErrorReporter()
+        self.debug_info = {}  # Store debug information for each step
     
     def generate_wrapper_from_spec(self, spec_file: str) -> str:
         """Generate wrapper Verilog code from input specification file"""
@@ -814,6 +815,10 @@ class WrapperGenerator:
     
     def generate_wrapper_from_config(self, config_dir: str) -> str:
         """Generate wrapper Verilog code from configuration directory"""
+        # Clear previous debug info
+        self.debug_info = {}
+        
+        # Parse configuration
         config = self.config_parser.parse_config_directory(config_dir)
         
         # Validate configuration before generating wrapper
@@ -821,7 +826,22 @@ class WrapperGenerator:
             print(f"\nValidation failed. Found {len(self.error_reporter.errors)} error(s) and {len(self.error_reporter.warnings)} warning(s).")
             return ""
         
-        return self.generate_wrapper_advanced(config)
+        # Generate wrapper and collect debug info
+        wrapper_code = self.generate_wrapper_advanced(config)
+        
+        # Generate debug reports
+        self._generate_debug_reports(config_dir)
+        
+        # Save final wrapper code to rpt directory
+        import os
+        rpt_dir = "./rpt"
+        if not os.path.exists(rpt_dir):
+            os.makedirs(rpt_dir)
+        
+        with open(f"{rpt_dir}/06_final_wrapper.v", 'w') as f:
+            f.write(wrapper_code)
+        
+        return wrapper_code
     
     def generate_wrapper_advanced(self, config: Dict) -> str:
         """Generate wrapper Verilog code from advanced configuration"""
@@ -835,6 +855,7 @@ class WrapperGenerator:
         
         # Parse all modules and create instances
         instances = []
+        parsed_modules = []
         
         for inst_config in instances_config:
             # Parse module with specific module name if provided
@@ -842,6 +863,15 @@ class WrapperGenerator:
             module = self.parser.parse_module(inst_config['file'], target_module_name)
             instance_name = inst_config['instance_name']
             parameters = inst_config.get('parameters', {})
+            
+            # Collect module parsing info for debug report
+            module_params = self._extract_parameters_from_module(inst_config['file'])
+            parsed_modules.append({
+                'name': module.name,
+                'file': inst_config['file'],
+                'parameters': module_params,
+                'ports': module.ports
+            })
             
             # Build port mapping from instance_to_top
             port_mapping = {}
@@ -852,6 +882,16 @@ class WrapperGenerator:
             
             instance = Instance(module=module, instance_name=instance_name, parameters=parameters, port_mapping=port_mapping)
             instances.append(instance)
+        
+        # Store parsed modules info for debug report
+        self.debug_info['parsed_modules'] = parsed_modules
+        
+        # Store connection info for debug report
+        self.debug_info['connections'] = {
+            'instance_to_top': instance_to_top_config,
+            'instance_connections': instance_connections,
+            'export_ports': instance_export_ports
+        }
         
         # Add exported ports to top_ports, avoiding duplicates
         exported_top_ports = self._generate_exported_ports(instances, instance_export_ports)
@@ -1145,32 +1185,22 @@ class WrapperGenerator:
             return port_spec, None
     
     def _generate_wire_name(self, source_spec: str, target_spec: str) -> str:
-        """Generate wire name showing source->target direction with w_ prefix"""
+        """Generate concise wire name for connections"""
         # Extract port names and ranges
         source_port, source_range = self._extract_port_and_range(source_spec)
         target_port, target_range = self._extract_port_and_range(target_spec)
         
-        # Clean up port names
+        # Use source port as the base for wire name (more intuitive)
         source_clean = source_port.replace('.', '_')
-        target_clean = target_port.replace('.', '_')
         
         # Add range information if present
         range_suffix = ""
-        if source_range and target_range:
-            # Both have ranges - show mapping
-            source_bits = source_range.replace('[', '').replace(']', '').replace(':', '_')
-            target_bits = target_range.replace('[', '').replace(']', '').replace(':', '_')
-            range_suffix = f"_{source_bits}_to_{target_bits}"
-        elif source_range:
-            # Only source has range
+        if source_range:
+            # Simplify range representation
             source_bits = source_range.replace('[', '').replace(']', '').replace(':', '_')
             range_suffix = f"_{source_bits}"
-        elif target_range:
-            # Only target has range
-            target_bits = target_range.replace('[', '').replace(']', '').replace(':', '_')
-            range_suffix = f"_to_{target_bits}"
         
-        return f"w_{source_clean}_to_{target_clean}{range_suffix}"
+        return f"w_{source_clean}{range_suffix}"
     
     def _get_port_width_value(self, width_str: str) -> str:
         """Extract the bit width value from port width string like '[7:0]' -> '8' """
@@ -1382,6 +1412,179 @@ class WrapperGenerator:
         resolved_params = self._resolve_parameter_dependencies_improved(param_dict)
         
         return resolved_params
+    
+    def _generate_debug_reports(self, config_dir: str = "./config"):
+        """Generate comprehensive debug reports for each step"""
+        import os
+        
+        # Ensure rpt directory exists
+        rpt_dir = "./rpt"
+        if not os.path.exists(rpt_dir):
+            os.makedirs(rpt_dir)
+        
+        # 1. Generate parsing report
+        self._generate_parsing_report(rpt_dir)
+        
+        # 2. Generate configuration report
+        self._generate_config_report(config_dir, rpt_dir)
+        
+        # 3. Generate connection analysis report
+        self._generate_connection_report(rpt_dir)
+        
+        # 4. Generate parameter resolution report
+        self._generate_parameter_report(rpt_dir)
+        
+        # 5. Generate wire generation report
+        self._generate_wire_report(rpt_dir)
+        
+        print(f"Debug reports generated in {rpt_dir}/ directory")
+    
+    def _generate_parsing_report(self, rpt_dir: str):
+        """Generate detailed parsing report for each module"""
+        if 'parsed_modules' not in self.debug_info:
+            return
+        
+        with open(f"{rpt_dir}/01_parsing_report.txt", 'w') as f:
+            f.write("# Verilog Module Parsing Report\n")
+            f.write("# Generated by Verilog Wrapper Generator\n\n")
+            f.write("=" * 60 + "\n")
+            f.write("MODULE PARSING ANALYSIS\n")
+            f.write("=" * 60 + "\n\n")
+            
+            for module_info in self.debug_info['parsed_modules']:
+                f.write(f"Module: {module_info['name']}\n")
+                f.write(f"File: {module_info['file']}\n")
+                f.write(f"Parameters: {len(module_info.get('parameters', {}))}\n")
+                f.write(f"Ports: {len(module_info.get('ports', []))}\n\n")
+                
+                # Parameter details
+                if module_info.get('parameters'):
+                    f.write("Parameters:\n")
+                    for param_name, param_value in module_info['parameters'].items():
+                        f.write(f"  {param_name} = {param_value}\n")
+                    f.write("\n")
+                
+                # Port details
+                if module_info.get('ports'):
+                    f.write("Ports:\n")
+                    for port in module_info['ports']:
+                        width_str = f"[{port.width}]" if port.width else ""
+                        f.write(f"  {port.direction:6} {width_str:15} {port.name}\n")
+                    f.write("\n")
+                
+                f.write("-" * 40 + "\n\n")
+    
+    def _generate_config_report(self, config_dir: str, rpt_dir: str):
+        """Generate configuration parsing report"""
+        with open(f"{rpt_dir}/02_config_report.txt", 'w') as f:
+            f.write("# Configuration Parsing Report\n")
+            f.write("# Generated by Verilog Wrapper Generator\n\n")
+            f.write("=" * 60 + "\n")
+            f.write("CONFIGURATION ANALYSIS\n")
+            f.write("=" * 60 + "\n\n")
+            
+            # Parse and report each config file
+            config_files = [
+                ('01_top_module.cmd', 'Top Module Configuration'),
+                ('02_instances.cmd', 'Instance Configuration'),
+                ('03_top_ports.cmd', 'Top Port Configuration'),
+                ('04_instance_to_top.cmd', 'Instance to Top Mapping'),
+                ('05_instance_connections.cmd', 'Instance Connections'),
+                ('06_instance_export_port.cmd', 'Instance Export Ports')
+            ]
+            
+            for config_file, description in config_files:
+                f.write(f"{description}:\n")
+                f.write(f"File: {config_file}\n")
+                
+                try:
+                    with open(f"{config_dir}/{config_file}", 'r') as cf:
+                        content = cf.read()
+                        f.write(f"Content:\n{content}\n")
+                except FileNotFoundError:
+                    f.write("File not found\n")
+                
+                f.write("-" * 40 + "\n\n")
+    
+    def _generate_connection_report(self, rpt_dir: str):
+        """Generate connection analysis report"""
+        if 'connections' not in self.debug_info:
+            return
+        
+        with open(f"{rpt_dir}/03_connection_report.txt", 'w') as f:
+            f.write("# Connection Analysis Report\n")
+            f.write("# Generated by Verilog Wrapper Generator\n\n")
+            f.write("=" * 60 + "\n")
+            f.write("CONNECTION ANALYSIS\n")
+            f.write("=" * 60 + "\n\n")
+            
+            connections = self.debug_info['connections']
+            
+            f.write("Instance-to-Top Connections:\n")
+            for source, target in connections.get('instance_to_top', {}).items():
+                f.write(f"  {source} -> {target}\n")
+            f.write("\n")
+            
+            f.write("Instance-to-Instance Connections:\n")
+            for conn in connections.get('instance_connections', []):
+                f.write(f"  {conn['source']} -> {conn['target']}\n")
+            f.write("\n")
+            
+            if connections.get('export_ports'):
+                f.write("Export Ports:\n")
+                for export in connections['export_ports']:
+                    f.write(f"  {export}\n")
+                f.write("\n")
+    
+    def _generate_parameter_report(self, rpt_dir: str):
+        """Generate parameter resolution report"""
+        if 'parameters' not in self.debug_info:
+            return
+        
+        with open(f"{rpt_dir}/04_parameter_report.txt", 'w') as f:
+            f.write("# Parameter Resolution Report\n")
+            f.write("# Generated by Verilog Wrapper Generator\n\n")
+            f.write("=" * 60 + "\n")
+            f.write("PARAMETER RESOLUTION ANALYSIS\n")
+            f.write("=" * 60 + "\n\n")
+            
+            params = self.debug_info['parameters']
+            
+            for instance_name, instance_params in params.items():
+                f.write(f"Instance: {instance_name}\n")
+                f.write("Original Parameters:\n")
+                for param_name, param_value in instance_params.get('original', {}).items():
+                    f.write(f"  {param_name} = {param_value}\n")
+                f.write("\n")
+                
+                f.write("Resolved Parameters:\n")
+                for param_name, param_value in instance_params.get('resolved', {}).items():
+                    f.write(f"  {param_name} = {param_value}\n")
+                f.write("\n")
+                
+                f.write("-" * 40 + "\n\n")
+    
+    def _generate_wire_report(self, rpt_dir: str):
+        """Generate wire generation report"""
+        if 'wires' not in self.debug_info:
+            return
+        
+        with open(f"{rpt_dir}/05_wire_report.txt", 'w') as f:
+            f.write("# Wire Generation Report\n")
+            f.write("# Generated by Verilog Wrapper Generator\n\n")
+            f.write("=" * 60 + "\n")
+            f.write("WIRE GENERATION ANALYSIS\n")
+            f.write("=" * 60 + "\n\n")
+            
+            wires = self.debug_info['wires']
+            
+            f.write("Generated Internal Wires:\n")
+            for wire_name, wire_width in wires.items():
+                width_str = f"[{wire_width}]" if wire_width else ""
+                f.write(f"  wire {width_str:15} {wire_name};\n")
+            f.write("\n")
+            
+            f.write(f"Total wires generated: {len(wires)}\n")
     
     def _parse_parameter_declarations(self, param_section: str) -> Dict[str, str]:
         """Parse parameter declarations from a section, handling complex expressions properly"""
@@ -1873,6 +2076,8 @@ class WrapperGenerator:
         
         # Collect all parameters needed for port widths from instances
         all_instance_params = {}
+        parameter_debug_info = {}
+        
         for instance in instances:
             module_params = self._extract_parameters_from_module(instance.module.file_path)
             # Create instance-specific parameter dict with overrides
@@ -1880,9 +2085,23 @@ class WrapperGenerator:
             if instance.parameters:
                 for param_name, param_value in instance.parameters.items():
                     instance_params[param_name] = param_value
+            
+            # Store original parameters for debug
+            parameter_debug_info[instance.instance_name] = {
+                'original': module_params.copy(),
+                'overrides': instance.parameters.copy() if instance.parameters else {},
+                'resolved': {}
+            }
+            
             # Re-evaluate local parameters with instance-specific values
             instance_params = self._resolve_parameter_dependencies_improved(instance_params)
             all_instance_params.update(instance_params)
+            
+            # Store resolved parameters for debug
+            parameter_debug_info[instance.instance_name]['resolved'] = instance_params.copy()
+        
+        # Store parameter debug info
+        self.debug_info['parameters'] = parameter_debug_info
         
         # Find parameters referenced in port widths
         port_width_params = set()
@@ -1995,57 +2214,59 @@ class WrapperGenerator:
                                 break
                         break
         
-        # Add internal wires only for ports that actually need them
-        for instance in instances:
-            # Get instance-specific parameter values
-            module_params = self._extract_parameters_from_module(instance.module.file_path)
-            instance_params = module_params.copy()
-            if instance.parameters:
-                for param_name, param_value in instance.parameters.items():
-                    instance_params[param_name] = param_value
-            instance_params = self._resolve_parameter_dependencies(instance_params)
+        # Improved wire generation: Only create wires that are actually needed
+        # Track which wires are actually needed to avoid duplicates
+        needed_wires = set()
+        
+        # Check instance connections to determine needed wires
+        for connection in instance_connections:
+            source_port, source_range = self._extract_port_and_range(connection['source'])
+            target_port, target_range = self._extract_port_and_range(connection['target'])
             
-            for port in instance.module.ports:
-                inst_port = f"{instance.instance_name}.{port.name}"
-                wire_name = f"w_{instance.instance_name}_{port.name}"
+            # Skip special connections
+            if connection['target'] in ['TIE0', 'TIE1', 'FLOAT']:
+                continue
                 
-                # Check if this port needs a wire
-                needs_wire = False
-                is_directly_connected_to_top = False
-                
-                # Check if port is directly connected to top-level port (no wire needed)
-                for mapped_port, top_port in instance_to_top.items():
-                    if mapped_port.split('[')[0] == inst_port:
-                        if top_port not in ['TIE0', 'TIE1', 'FLOAT'] and '[' not in mapped_port:
-                            # Direct connection to top-level port, no wire needed
-                            is_directly_connected_to_top = True
+            # Use concise wire name from source
+            wire_name = self._generate_wire_name(connection['source'], connection['target'])
+            needed_wires.add(wire_name)
+        
+        # Generate internal wires for needed connections
+        for wire_name in needed_wires:
+            # Find the source port to get its width
+            for connection in instance_connections:
+                if wire_name == self._generate_wire_name(connection['source'], connection['target']):
+                    source_port, source_range = self._extract_port_and_range(connection['source'])
+                    
+                    # Find the instance that owns this port
+                    for instance in instances:
+                        inst_port = f"{instance.instance_name}.{connection['source'].split('.')[1].split('[')[0]}"
+                        if source_port.startswith(f"{instance.instance_name}."):
+                            # Get instance-specific parameter values
+                            module_params = self._extract_parameters_from_module(instance.module.file_path)
+                            instance_params = module_params.copy()
+                            if instance.parameters:
+                                for param_name, param_value in instance.parameters.items():
+                                    instance_params[param_name] = param_value
+                            instance_params = self._resolve_parameter_dependencies_improved(instance_params)
+                            
+                            # Find the port and get its width
+                            port_name = source_port.split('.', 1)[1]
+                            for port in instance.module.ports:
+                                if port.name == port_name:
+                                    if source_range:
+                                        # Use the range as width
+                                        internal_wires[wire_name] = source_range
+                                    else:
+                                        # Use full port width
+                                        width = self._substitute_parameters(port.width, instance_params) if port.width else None
+                                        internal_wires[wire_name] = width
+                                    break
                             break
-                        else:
-                            # TIE connection or partial connection, wire needed
-                            needs_wire = True
-                            break
-                
-                # Check if port is used in instance-to-instance connections
-                if not is_directly_connected_to_top:
-                    for connection in instance_connections:
-                        if connection['source'].split('[')[0] == inst_port or connection['target'].split('[')[0] == inst_port:
-                            needs_wire = True
-                            break
-                
-                # Check if port has partial bit connections
-                if not is_directly_connected_to_top and not needs_wire:
-                    for mapped_port in instance_to_top.keys():
-                        if mapped_port.split('[')[0] == inst_port and '[' in mapped_port:
-                            needs_wire = True
-                            break
-                
-                # Add wire only if needed
-                if needs_wire and wire_name not in top_port_names:
-                    # Substitute instance-specific parameter values in width
-                    width = self._substitute_parameters(port.width, instance_params) if port.width else None
-                    internal_wires[wire_name] = width
-                
-                # Don't create unconnected wires - handle unconnected ports directly in instance connections
+                    break
+        
+        # Store wire debug info
+        self.debug_info['wires'] = internal_wires
         
         # Generate wire declarations
         if internal_wires:
