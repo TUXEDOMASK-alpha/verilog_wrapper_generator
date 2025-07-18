@@ -546,6 +546,9 @@ class ConfigParser:
                     param_name, param_value = line.split('=', 1)
                     config['parameters'][param_name.strip()] = param_value.strip()
         
+        # Generate immediate config report (skip for ConfigParser class)
+        # self._generate_immediate_config_report(file_path, config)
+        
         return config
     
     def _parse_instances(self, file_path: str) -> List[Dict]:
@@ -566,31 +569,50 @@ class ConfigParser:
                 in_instances_section = True
                 continue
             
-            if in_instances_section and '|' in line:
-                parts = [p.strip() for p in line.split('|')]
+            if in_instances_section and (('|' in line) or len(line.split()) >= 2):
+                # Support both | separator and space separator
+                if '|' in line:
+                    parts = [p.strip() for p in line.split('|')]
+                else:
+                    parts = line.split()
+                    
                 if len(parts) >= 2:
                     instance_name = parts[0]
-                    module_file = parts[1]
-                    module_name = None
-                    parameters = {}
                     
-                    # Check if module name is specified separately (3+ parts)
-                    if len(parts) >= 3 and parts[2] and not '=' in parts[2]:
-                        # parts[2] is module name, parameters start from parts[3]
-                        module_name = parts[2]
-                        if len(parts) > 3 and parts[3]:
-                            param_str = parts[3]
+                    # Handle different formats
+                    if '|' in line:
+                        # Original format: instance_name | module_file | module_name | parameters
+                        module_file = parts[1]
+                        module_name = None
+                        parameters = {}
+                        
+                        # Check if module name is specified separately (3+ parts)
+                        if len(parts) >= 3 and parts[2] and not '=' in parts[2]:
+                            # parts[2] is module name, parameters start from parts[3]
+                            module_name = parts[2]
+                            if len(parts) > 3 and parts[3]:
+                                param_str = parts[3]
+                                for param in param_str.split(','):
+                                    if '=' in param:
+                                        key, value = param.split('=', 1)
+                                        parameters[key.strip()] = value.strip()
+                        elif len(parts) > 2 and parts[2]:
+                            # parts[2] contains parameters (backward compatibility)
+                            param_str = parts[2]
                             for param in param_str.split(','):
                                 if '=' in param:
                                     key, value = param.split('=', 1)
                                     parameters[key.strip()] = value.strip()
-                    elif len(parts) > 2 and parts[2]:
-                        # parts[2] contains parameters (backward compatibility)
-                        param_str = parts[2]
-                        for param in param_str.split(','):
-                            if '=' in param:
-                                key, value = param.split('=', 1)
-                                parameters[key.strip()] = value.strip()
+                    else:
+                        # New format: instance_name module_name module_file
+                        if len(parts) >= 3:
+                            module_name = parts[1]
+                            module_file = parts[2]
+                        else:
+                            # Format: instance_name module_file
+                            module_name = None
+                            module_file = parts[1]
+                        parameters = {}
                     
                     instances.append({
                         'instance_name': instance_name,
@@ -620,14 +642,48 @@ class ConfigParser:
                 in_ports_section = True
                 continue
             
-            if in_ports_section and '|' in line:
-                parts = [p.strip() for p in line.split('|')]
-                if len(parts) >= 3:
-                    direction = parts[0]
-                    width = parts[1] if parts[1] else None
-                    name = parts[2]
-                    
-                    ports.append(Port(name=name, direction=direction, width=width))
+            if in_ports_section:
+                # Support both | separator and space separator
+                if '|' in line:
+                    parts = [p.strip() for p in line.split('|')]
+                    if len(parts) >= 3:
+                        direction = parts[0]
+                        width = parts[1] if parts[1] else None
+                        name = parts[2]
+                        
+                        ports.append(Port(name=name, direction=direction, width=width))
+                else:
+                    # Parse space-separated format: direction [width] name
+                    parts = line.split()
+                    if len(parts) >= 2:
+                        direction = parts[0]
+                        
+                        # Check for width specification
+                        width = None
+                        name = None
+                        
+                        if len(parts) >= 3:
+                            # Look for width pattern like [7:0] or wire
+                            if parts[1] == 'wire':
+                                # Format: input wire [7:0] name or input wire name
+                                if len(parts) >= 4 and parts[2].startswith('[') and parts[2].endswith(']'):
+                                    width = parts[2]
+                                    name = parts[3]
+                                else:
+                                    name = parts[2]
+                            elif parts[1].startswith('[') and parts[1].endswith(']'):
+                                # Format: input [7:0] name
+                                width = parts[1]
+                                name = parts[2]
+                            else:
+                                # Format: input name
+                                name = parts[1]
+                        else:
+                            # Format: input name
+                            name = parts[1]
+                        
+                        if name:
+                            ports.append(Port(name=name, direction=direction, width=width))
         
         return ports
     
@@ -649,12 +705,21 @@ class ConfigParser:
                 in_mapping_section = True
                 continue
             
-            if in_mapping_section and '->' in line:
-                parts = [p.strip() for p in line.split('->')]
-                if len(parts) == 2:
-                    instance_port = parts[0]
-                    top_port = parts[1]
-                    mappings[instance_port] = top_port
+            if in_mapping_section:
+                # Support both -> separator and space separator
+                if '->' in line:
+                    parts = [p.strip() for p in line.split('->')]
+                    if len(parts) == 2:
+                        instance_port = parts[0]
+                        top_port = parts[1]
+                        mappings[instance_port] = top_port
+                else:
+                    # Support space-separated format: instance_port top_port
+                    parts = line.split()
+                    if len(parts) >= 2:
+                        instance_port = parts[0]
+                        top_port = parts[1]
+                        mappings[instance_port] = top_port
         
         return mappings
     
@@ -676,15 +741,27 @@ class ConfigParser:
                 in_connections_section = True
                 continue
             
-            if in_connections_section and '->' in line:
-                parts = [p.strip() for p in line.split('->')]
-                if len(parts) == 2:
-                    source = parts[0]
-                    target = parts[1]
-                    connections.append({
-                        'source': source,
-                        'target': target
-                    })
+            if in_connections_section:
+                # Support both -> separator and space separator
+                if '->' in line:
+                    parts = [p.strip() for p in line.split('->')]
+                    if len(parts) == 2:
+                        source = parts[0]
+                        target = parts[1]
+                        connections.append({
+                            'source': source,
+                            'target': target
+                        })
+                else:
+                    # Support space-separated format: source target
+                    parts = line.split()
+                    if len(parts) >= 2:
+                        source = parts[0]
+                        target = parts[1]
+                        connections.append({
+                            'source': source,
+                            'target': target
+                        })
         
         return connections
     
@@ -1408,10 +1485,162 @@ class WrapperGenerator:
         for param_name, param_value in param_dict.items():
             self._original_expressions[param_name] = param_value
         
+        # Generate immediate parsing report
+        self._generate_immediate_parsing_report(file_path, param_dict)
+        
         # Improved parameter dependency resolution with better ordering
         resolved_params = self._resolve_parameter_dependencies_improved(param_dict)
         
         return resolved_params
+    
+    def _generate_immediate_parsing_report(self, file_path: str, param_dict: Dict[str, str]):
+        """Generate immediate parsing report for a single module"""
+        import os
+        
+        # Ensure rpt directory exists
+        rpt_dir = "./rpt"
+        if not os.path.exists(rpt_dir):
+            os.makedirs(rpt_dir)
+        
+        # Get module name from file path
+        module_name = os.path.splitext(os.path.basename(file_path))[0]
+        
+        # Write immediate parsing report
+        with open(f"{rpt_dir}/01_parsing_report.txt", 'a') as f:
+            f.write(f"# Parsing Report for {module_name}\n")
+            f.write(f"# File: {file_path}\n")
+            f.write(f"# Generated: {self._get_timestamp()}\n\n")
+            f.write("=" * 60 + "\n")
+            f.write(f"MODULE: {module_name}\n")
+            f.write("=" * 60 + "\n\n")
+            
+            f.write(f"Parameters found: {len(param_dict)}\n")
+            if param_dict:
+                f.write("Parameter details:\n")
+                for param_name, param_value in param_dict.items():
+                    f.write(f"  {param_name:20} = {param_value}\n")
+            else:
+                f.write("No parameters found\n")
+            
+            f.write("\n" + "-" * 60 + "\n\n")
+    
+    def _get_timestamp(self) -> str:
+        """Get current timestamp for reports"""
+        from datetime import datetime
+        return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    def _generate_immediate_config_report(self, file_path: str, config: Dict):
+        """Generate immediate configuration report"""
+        import os
+        
+        # Ensure rpt directory exists
+        rpt_dir = "./rpt"
+        if not os.path.exists(rpt_dir):
+            os.makedirs(rpt_dir)
+        
+        # Get config file name
+        config_file_name = os.path.basename(file_path)
+        
+        # Write immediate config report
+        with open(f"{rpt_dir}/02_config_report.txt", 'a') as f:
+            f.write(f"# Configuration Report for {config_file_name}\n")
+            f.write(f"# File: {file_path}\n")
+            f.write(f"# Generated: {self._get_timestamp()}\n\n")
+            f.write("=" * 60 + "\n")
+            f.write(f"CONFIG FILE: {config_file_name}\n")
+            f.write("=" * 60 + "\n\n")
+            
+            if config_file_name == "01_top_module.cmd":
+                f.write(f"Top Module Name: {config.get('name', 'N/A')}\n")
+                f.write(f"Parameters: {len(config.get('parameters', {}))}\n")
+                if config.get('parameters'):
+                    f.write("Parameter details:\n")
+                    for param_name, param_value in config['parameters'].items():
+                        f.write(f"  {param_name:20} = {param_value}\n")
+                else:
+                    f.write("No parameters defined\n")
+            else:
+                f.write(f"Config data: {config}\n")
+            
+            f.write("\n" + "-" * 60 + "\n\n")
+    
+    def _generate_immediate_parameter_report(self, parameter_debug_info: Dict):
+        """Generate immediate parameter report"""
+        import os
+        
+        # Ensure rpt directory exists
+        rpt_dir = "./rpt"
+        if not os.path.exists(rpt_dir):
+            os.makedirs(rpt_dir)
+        
+        # Write immediate parameter report
+        with open(f"{rpt_dir}/04_parameter_report.txt", 'a') as f:
+            f.write(f"# Parameter Resolution Report\n")
+            f.write(f"# Generated: {self._get_timestamp()}\n\n")
+            f.write("=" * 60 + "\n")
+            f.write("PARAMETER RESOLUTION ANALYSIS\n")
+            f.write("=" * 60 + "\n\n")
+            
+            for instance_name, param_info in parameter_debug_info.items():
+                f.write(f"Instance: {instance_name}\n")
+                f.write(f"Original parameters: {len(param_info['original'])}\n")
+                f.write(f"Override parameters: {len(param_info['overrides'])}\n")
+                f.write(f"Resolved parameters: {len(param_info['resolved'])}\n\n")
+                
+                if param_info['original']:
+                    f.write("Original parameters:\n")
+                    for param_name, param_value in param_info['original'].items():
+                        f.write(f"  {param_name:20} = {param_value}\n")
+                    f.write("\n")
+                
+                if param_info['overrides']:
+                    f.write("Override parameters:\n")
+                    for param_name, param_value in param_info['overrides'].items():
+                        f.write(f"  {param_name:20} = {param_value}\n")
+                    f.write("\n")
+                
+                if param_info['resolved']:
+                    f.write("Resolved parameters:\n")
+                    for param_name, param_value in param_info['resolved'].items():
+                        f.write(f"  {param_name:20} = {param_value}\n")
+                    f.write("\n")
+                
+                f.write("-" * 40 + "\n\n")
+    
+    def _generate_immediate_wire_report(self, wire_generation_info: Dict):
+        """Generate immediate wire generation report"""
+        import os
+        
+        # Ensure rpt directory exists
+        rpt_dir = "./rpt"
+        if not os.path.exists(rpt_dir):
+            os.makedirs(rpt_dir)
+        
+        # Write immediate wire report
+        with open(f"{rpt_dir}/05_wire_report.txt", 'a') as f:
+            f.write(f"# Wire Generation Report\n")
+            f.write(f"# Generated: {self._get_timestamp()}\n\n")
+            f.write("=" * 60 + "\n")
+            f.write("WIRE GENERATION ANALYSIS\n")
+            f.write("=" * 60 + "\n\n")
+            
+            f.write(f"Total internal wires: {len(wire_generation_info['internal_wires'])}\n")
+            f.write(f"Total connections: {len(wire_generation_info['connections'])}\n\n")
+            
+            if wire_generation_info['internal_wires']:
+                f.write("Internal wires:\n")
+                for wire_name, wire_width in wire_generation_info['internal_wires'].items():
+                    width_str = f"[{wire_width}]" if wire_width else ""
+                    f.write(f"  {wire_name:30} {width_str}\n")
+                f.write("\n")
+            
+            if wire_generation_info['connections']:
+                f.write("Connections:\n")
+                for i, connection in enumerate(wire_generation_info['connections']):
+                    f.write(f"  {i+1:2}: {connection['source']} -> {connection['target']}\n")
+                f.write("\n")
+            
+            f.write("-" * 60 + "\n\n")
     
     def _generate_debug_reports(self, config_dir: str = "./config"):
         """Generate comprehensive debug reports for each step"""
@@ -2103,6 +2332,9 @@ class WrapperGenerator:
         # Store parameter debug info
         self.debug_info['parameters'] = parameter_debug_info
         
+        # Generate immediate parameter report
+        self._generate_immediate_parameter_report(parameter_debug_info)
+        
         # Find parameters referenced in port widths
         port_width_params = set()
         for port in top_ports:
@@ -2217,6 +2449,16 @@ class WrapperGenerator:
         # Improved wire generation: Only create wires that are actually needed
         # Track which wires are actually needed to avoid duplicates
         needed_wires = set()
+        
+        # Store wire generation info for immediate reporting
+        wire_generation_info = {
+            'internal_wires': internal_wires.copy(),
+            'needed_wires': needed_wires,
+            'connections': instance_connections
+        }
+        
+        # Generate immediate wire report
+        self._generate_immediate_wire_report(wire_generation_info)
         
         # Check instance connections to determine needed wires
         for connection in instance_connections:
