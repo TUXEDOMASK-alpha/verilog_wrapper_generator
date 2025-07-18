@@ -133,141 +133,32 @@ class VerilogParser:
     
     def _find_module_declaration(self, content: str) -> Optional[tuple]:
         """Find module declaration handling complex parameter declarations"""
-        # Remove all whitespace and newlines for easier parsing
-        clean_content = re.sub(r'\s+', ' ', content)
+        # Use a more robust regex to find module declaration
+        # This pattern matches: module name (optional #(params)) (ports);
+        module_pattern = r'module\s+(\w+)\s*(?:#\s*\([^)]*\))?\s*\((.*?)\)\s*;'
         
-        # Look for module keyword
-        module_match = re.search(r'module\s+(\w+)', clean_content)
+        # Look for module declaration
+        module_match = re.search(module_pattern, content, re.DOTALL)
         if not module_match:
             return None
         
         module_name = module_match.group(1)
-        
-        # Find the start of module declaration
-        module_start = module_match.start()
-        
-        # Look for parameter section (optional)
-        param_start = clean_content.find('#', module_start)
-        if param_start != -1:
-            # Module has parameters, find the end of parameter section
-            paren_start = clean_content.find('(', param_start)
-            if paren_start == -1:
-                return None
-            
-            # Find matching closing parenthesis for parameters
-            paren_count = 1
-            i = paren_start + 1
-            while i < len(clean_content) and paren_count > 0:
-                if clean_content[i] == '(':
-                    paren_count += 1
-                elif clean_content[i] == ')':
-                    paren_count -= 1
-                i += 1
-            
-            if paren_count > 0:
-                return None  # Unmatched parentheses
-            
-            # Find port section start
-            port_start = clean_content.find('(', i)
-        else:
-            # No parameters, find port section directly
-            port_start = clean_content.find('(', module_start)
-        
-        if port_start == -1:
-            return None
-        
-        # Find the end of port section
-        paren_count = 1
-        i = port_start + 1
-        while i < len(clean_content) and paren_count > 0:
-            if clean_content[i] == '(':
-                paren_count += 1
-            elif clean_content[i] == ')':
-                paren_count -= 1
-            i += 1
-        
-        if paren_count > 0:
-            return None  # Unmatched parentheses
-        
-        # Check if followed by semicolon
-        j = i
-        while j < len(clean_content) and clean_content[j].isspace():
-            j += 1
-        
-        if j >= len(clean_content) or clean_content[j] != ';':
-            return None
-        
-        # Extract port section
-        port_section = clean_content[port_start + 1:i - 1]
+        port_section = module_match.group(2)
         
         return (module_name, port_section)
     
     def _find_specific_module(self, content: str, target_module_name: str) -> Optional[tuple]:
         """Find a specific module declaration by name"""
-        # Use the same robust parsing logic as _find_module_declaration
-        clean_content = re.sub(r'\s+', ' ', content)
+        # Use a more robust regex to find specific module declaration
+        # This pattern matches: module target_name (optional #(params)) (ports);
+        module_pattern = rf'module\s+{re.escape(target_module_name)}\s*(?:#\s*\([^)]*\))?\s*\((.*?)\)\s*;'
         
-        # Look for the specific module
-        module_pattern = rf'module\s+{re.escape(target_module_name)}\b'
-        module_match = re.search(module_pattern, clean_content)
+        # Look for module declaration
+        module_match = re.search(module_pattern, content, re.DOTALL)
         if not module_match:
             return None
         
-        module_start = module_match.start()
-        
-        # Look for parameter section (optional)
-        param_start = clean_content.find('#', module_start)
-        if param_start != -1:
-            # Module has parameters, find the end of parameter section
-            paren_start = clean_content.find('(', param_start)
-            if paren_start == -1:
-                return None
-            
-            # Find matching closing parenthesis for parameters
-            paren_count = 1
-            i = paren_start + 1
-            while i < len(clean_content) and paren_count > 0:
-                if clean_content[i] == '(':
-                    paren_count += 1
-                elif clean_content[i] == ')':
-                    paren_count -= 1
-                i += 1
-            
-            if paren_count > 0:
-                return None  # Unmatched parentheses
-            
-            # Find port section start
-            port_start = clean_content.find('(', i)
-        else:
-            # No parameters, find port section directly
-            port_start = clean_content.find('(', module_start)
-        
-        if port_start == -1:
-            return None
-        
-        # Find the end of port section
-        paren_count = 1
-        i = port_start + 1
-        while i < len(clean_content) and paren_count > 0:
-            if clean_content[i] == '(':
-                paren_count += 1
-            elif clean_content[i] == ')':
-                paren_count -= 1
-            i += 1
-        
-        if paren_count > 0:
-            return None  # Unmatched parentheses
-        
-        # Check if followed by semicolon
-        j = i
-        while j < len(clean_content) and clean_content[j].isspace():
-            j += 1
-        
-        if j >= len(clean_content) or clean_content[j] != ';':
-            return None
-        
-        # Extract port section
-        port_section = clean_content[port_start + 1:i - 1]
+        port_section = module_match.group(1)
         
         return (target_module_name, port_section)
     
