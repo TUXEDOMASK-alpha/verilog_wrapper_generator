@@ -1596,7 +1596,8 @@ class WrapperGenerator:
             param_list = []
             for param_name, param_value in top_module_parameters.items():
                 param_list.append(f"parameter {param_name} = {param_value}")
-            param_str = f" #(\n    {',\n    '.join(param_list)}\n)"
+            newline = '\n'
+            param_str = f" #({newline}    {f',{newline}    '.join(param_list)}{newline})"
             lines.append(f"module {top_module_name}{param_str} (")
         else:
             lines.append(f"module {top_module_name} (")

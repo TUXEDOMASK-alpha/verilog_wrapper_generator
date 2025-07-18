@@ -6,7 +6,7 @@
 # 방향 | 포트폭 | 포트명  
 input | | clk
 input | | reset
-input | | enable
 input | [DATA_WIDTH-1:0] | data_in
+input | [ADDR_WIDTH-1:0] | addr
 output | [DATA_WIDTH-1:0] | data_out
 output | | valid
